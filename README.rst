@@ -15,4 +15,5 @@ http://patchwork.fabfile.org.
 
 You can install the `development version
 <https://github.com/fabric/patchwork/tarball/master#egg=patchwork-dev>`_ via
-``pip install patchwork==dev``.
+``pip install patchwork==dev`` or ``pip install -e
+git+https://github.com/fabric/patchwork@master#egg=patchwork-dev``.
