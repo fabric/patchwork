@@ -1,4 +1,4 @@
-from fabric.api import sudo
+from fabric.api import sudo, settings
 
 
 def directory(d, user=None, group=None, mode=None):
