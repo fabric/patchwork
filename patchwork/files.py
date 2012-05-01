@@ -1,4 +1,4 @@
-from fabric.api import sudo, settings
+from fabric.api import sudo, settings, hide
 
 
 def directory(d, user=None, group=None, mode=None):
@@ -18,5 +18,5 @@ def exists(path):
     Return True if given path exists on the current remote host.
     """
     cmd = 'test -e "$(echo %s)"' % path
-    with settings(warn_only=True):
+    with settings(hide('everything'), warn_only=True):
         return sudo(cmd).succeeded
