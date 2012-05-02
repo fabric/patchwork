@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 
-# Support setuptools or distutils
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
+# Would love to use distutils but fuck manually keeping a list of all my
+# subpackages by hand :(
+from setuptools import setup, find_packages
 
 # Import ourselves for version info
 import patchwork
@@ -26,7 +24,7 @@ Dev install: https://github.com/fabric/patchwork/tarball/master#egg=patchwork-de
     url='http://patchwork.fabfile.org',
 
     install_requires=["fabric>=1.4"],
-    packages=["patchwork"],
+    packages=find_packages(),
 
     classifiers=[
           'Development Status :: 3 - Alpha',
