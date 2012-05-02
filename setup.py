@@ -25,6 +25,7 @@ Dev install: https://github.com/bitprophet/patchwork/tarball/master#egg=patchwor
     author_email='jeff@bitprophet.org',
     url='http://patchwork.fabfile.org',
 
+    install_requires=["fabric>=1.4"],
     packages=["patchwork"],
 
     classifiers=[
