@@ -11,14 +11,6 @@ import patchwork
 
 # Frankenstein long_description: version-specific changelog note + README
 v = patchwork.__version__
-long_description = """
-**This is an unsupported alpha release! Documentation is not available yet. Check Fabric-related channels for a release announcement when we have docs set up.**
-
-To find out what's new in this version of Patchwork, please see `the changelog
-<http://docs.patchwork.fabfile.org/en/%s/changelog.html>`_.
-
-%s
-""" % (v, open('README.rst').read())
 
 setup(
     name='patchwork',
@@ -26,7 +18,9 @@ setup(
     description='Common deploy/sysadmin operations',
     license='BSD',
 
-    long_description=long_description,
+    long_description="""This is an unsupported alpha release! Use with caution.
+
+Dev install: https://github.com/bitprophet/patchwork/tarball/master#egg=patchwork-dev""",
     author='Jeff Forcier',
     author_email='jeff@bitprophet.org',
     url='http://patchwork.fabfile.org',
