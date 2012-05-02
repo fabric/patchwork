@@ -12,6 +12,8 @@ import patchwork
 # Frankenstein long_description: version-specific changelog note + README
 v = patchwork.__version__
 long_description = """
+**This is an unsupported alpha release! Documentation is not available yet. Check Fabric-related channels for a release announcement when we have docs set up.**
+
 To find out what's new in this version of Patchwork, please see `the changelog
 <http://docs.patchwork.fabfile.org/en/%s/changelog.html>`_.
 
