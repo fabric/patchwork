@@ -20,7 +20,7 @@ setup(
 
     long_description="""This is an unsupported alpha release! Use with caution.
 
-Dev install: https://github.com/bitprophet/patchwork/tarball/master#egg=patchwork-dev""",
+Dev install: https://github.com/fabric/patchwork/tarball/master#egg=patchwork-dev""",
     author='Jeff Forcier',
     author_email='jeff@bitprophet.org',
     url='http://patchwork.fabfile.org',
