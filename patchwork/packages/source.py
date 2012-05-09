@@ -167,7 +167,6 @@ def build(name, version, iteration, workdir, uri, enable=(), with_=(),
         else:
             print "!! Skipping stage step: %r exists" % sentinels['stage']
 
-    # Package
     with cd(stage):
         # TODO: handle clean fpm integration somehow. probably have nice Python
         # level handles for the stuff like package name, version, iteration,
@@ -175,7 +174,6 @@ def build(name, version, iteration, workdir, uri, enable=(), with_=(),
         # Main thing that needs doing is constructing an explicit package name
         # and making FPM use it, so one can reliably use that same name format
         # in eg Chef or Puppet.
-        package_path = "foo"
         if _run_step('package', sentinels, forcing):
             print "++ No package sentinel or package sentinel not found, running fpm..."
             pass
