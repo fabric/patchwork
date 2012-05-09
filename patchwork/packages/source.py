@@ -4,9 +4,10 @@ Functions for configuring/compiling/installing/packaging source distributions.
 
 import posixpath
 
-from fabric.api import task, run, cd, settings
+from fabric.api import task, run, cd, settings, abort
 
 from ..files import directory, exists
+from ..environment import has_binary
 from . import package
 
 
@@ -19,6 +20,8 @@ def _run_step(name, sentinels, forcing):
 # TODO: maybe break this up into fewer, richer args? e.g. objects or dicts.
 # Pro: smaller API
 # Con: requires boilerplate for simple stuff
+# TODO: great candidate for "collection of tasks" class based approach.
+# TODO: also re: each step now looking very similar, at LEAST loop.
 @task
 def build(name, version, iteration, workdir, uri, enable=(), with_=(),
     flagstr="", dependencies=(), sentinels=None, force="", runner=run):
@@ -82,6 +85,11 @@ def build(name, version, iteration, workdir, uri, enable=(), with_=(),
     uri = uri % context
     source = posixpath.join(workdir, package_name)
     stage = posixpath.join(workdir, 'stage')
+
+    # Make sure we have fpm or the ability to install it
+    if not has_binary("fpm"):
+        gems = " install Rubygems and then" if not has_binary("gem") else ""
+        abort("No fpm found! Please%s 'gem install fpm'." % gems)
 
     # Default to empty dict (can't use in sig, dicts are mutable)
     sentinels = sentinels or {}
