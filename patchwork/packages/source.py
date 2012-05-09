@@ -23,7 +23,7 @@ def _run_step(name, sentinels, forcing):
 # TODO: great candidate for "collection of tasks" class based approach.
 # TODO: also re: each step now looking very similar, at LEAST loop.
 @task
-def build(name, version, iteration, workdir, uri, enable=(), with_=(),
+def build(name, version, iteration, workdir, uri, type_, enable=(), with_=(),
     flagstr="", dependencies=(), sentinels=None, force="", runner=run):
     """
     Build a package from source, using fpm.
@@ -49,6 +49,8 @@ def build(name, version, iteration, workdir, uri, enable=(), with_=(),
       E.g. ``"http://php.net/get/%(package_name)s.tar.bz2/from/us.php.net/mirror"``
       or ``"http://my.mirror/packages/%(name)s/%(name)_%(version)s.tgz"``
 
+    * ``type``: Package type to build. Passed directly to ``fpm``, so should be
+      e.g. ``"deb"``, ``"rpm"`` etc.
     * ``enable`` and ``with_``: shorthand for adding configure flags. E.g.
       ``build(..., enable=['foo', 'bar'], with_=['biz'])`` results in adding
       the flags ``--enable-foo``, ``--enable-bar`` and ``--with-biz``.
@@ -176,7 +178,19 @@ def build(name, version, iteration, workdir, uri, enable=(), with_=(),
         # in eg Chef or Puppet.
         if _run_step('package', sentinels, forcing):
             print "++ No package sentinel or package sentinel not found, running fpm..."
-            pass
+            # --package <workdir> to control where package actually goes.
+            # Filename format will be the default for the given output type.
+            # Target directory is '.' since we're cd'd to stage root. Will then
+            # work OK for any potential --prefix the user may have given.
+            runner(r"""fpm \
+                    -s dir \
+                    -t %(type_)s \
+                    --name %(name)s \
+                    --version %(version)s \
+                    --iteration %(iteration)s \
+                    --package %(workdir)s \
+                    .
+            """ % locals()) # Yea, yea. Bite me.
         else:
             print "!! Skipping package step: %r exists" % sentinels['package']
 
