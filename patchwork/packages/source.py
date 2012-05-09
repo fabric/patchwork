@@ -130,22 +130,21 @@ def build(name, version, iteration, workdir, uri, enable=(), with_=(),
     enable_flags = map(lambda x: "--enable-%s" % x, enable)
     all_flags = " ".join([flagstr] + with_flags + enable_flags)
     with cd(source):
+        # If forcing configure or build, clean up first. Leftover artifacts
+        # from bad builds can be seriously annoying, especially if they don't
+        # cause outright problems.
+        if forcing['configure'] and exists('Makefile'):
+            # TODO: make this configurable, e.g. php 'really' wants
+            # distclean for max cleaning, others may too
+            runner("make clean")
         if _run_step('configure', sentinels, forcing):
             print "++ No Makefile found, running ./configure..."
-            # If forcing, clean up!
-            if forcing['configure']:
-                # TODO: make this configurable, e.g. php 'really' wants
-                # distclean for max cleaning, others may too
-                # TODO: ties in w/ same call down in build
-                runner("make clean")
             runner("./configure %s" % all_flags)
         else:
             print "!! Skipping configure step: %r exists." % sentinels['configure']
 
         # Build
         if _run_step('build', sentinels, forcing):
-            if forcing['build']:
-                runner("make clean")
             print "++ No build sentinel or build sentinel not found, running make..."
             runner("make")
         else:
