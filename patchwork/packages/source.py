@@ -89,6 +89,8 @@ def build(name, version, iteration, workdir, uri, type_, enable=(), with_=(),
     stage = posixpath.join(workdir, 'stage')
 
     # Make sure we have fpm or the ability to install it
+    # TODO: allow actual, non-staged make install which then doesn't need fpm
+    # or the package/distribute steps.
     if not has_binary("fpm"):
         gems = " install Rubygems and then" if not has_binary("gem") else ""
         abort("No fpm found! Please%s 'gem install fpm'." % gems)
