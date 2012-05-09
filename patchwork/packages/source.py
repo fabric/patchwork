@@ -4,13 +4,24 @@ Functions for configuring/compiling/installing/packaging source distributions.
 
 import posixpath
 
-from fabric.api import task, sudo, cd, settings
+from fabric.api import task, run, cd, settings
 
 from ..files import directory, exists
+from . import package
 
 
+def _run_step(name, sentinels, forcing):
+    sentinel = sentinels.get(name, None)
+    sentinel_present = exists(sentinel) if sentinel else False
+    return forcing[name] or not sentinel_present
+
+
+# TODO: maybe break this up into fewer, richer args? e.g. objects or dicts.
+# Pro: smaller API
+# Con: requires boilerplate for simple stuff
 @task
-def build(name, version, iteration, workdir, uri, force=""):
+def build(name, version, iteration, workdir, uri, enable=(), with_=(),
+    flagstr="", dependencies=(), sentinels=None, force="", runner=run):
     """
     Build a package from source, using fpm.
 
@@ -28,7 +39,6 @@ def build(name, version, iteration, workdir, uri, force=""):
       child of this directory as well. Example: ``"/opt/build"``.
     * ``uri``: Download URI. May (and probably should) contain interpolation
       syntax using the following keys:
-      
       * ``name``: same as kwarg
       * ``version``: same as kwarg
       * ``package_name``: same as ``"%(name)s-%(version)s"``
@@ -36,21 +46,51 @@ def build(name, version, iteration, workdir, uri, force=""):
       E.g. ``"http://php.net/get/%(package_name)s.tar.bz2/from/us.php.net/mirror"``
       or ``"http://my.mirror/packages/%(name)s/%(name)_%(version)s.tgz"``
 
-    May force a reset to one of the following stages by speciftying ``force``:
+    * ``enable`` and ``with_``: shorthand for adding configure flags. E.g.
+      ``build(..., enable=['foo', 'bar'], with_=['biz'])`` results in adding
+      the flags ``--enable-foo``, ``--enable-bar`` and ``--with-biz``.
+    * ``flagstr``: Arbitrary additional configure flags to add, e.g.
+      ``"--no-bad-stuff --with-blah=/usr/blah"``.
+    * ``dependencies``: Package names to ensure are installed prior to
+      building, using ``package()``.
+    * ``sentinels``: Keys are stages, values should be paths to files whose
+      existence indicates a successful run of that stage. For each given stage,
+      if ``force`` is not set (see below) and its ``sentinel`` value is
+      non-empty and the file exists, that stage will automatically be
+      skipped.
 
-    * ``get``: downloading the sources
-    * ``configure``: ./configure --flags
-    * ``build``: make
-    * ``stage``: make install into staging directory
-    * ``package``: staging directory => package file
+      Per-stage details:
+
+      * ``"configure"``: Default value for this key is ``"Makefile"``. The
+        other stages have no default values.
+      * ``"stage"``: The path given here is considered relative to the staging
+        directory, not the unpacked source directory.
+
+    May force a reset to one of the following stages by specifying ``force``:
+
+    * ``"get"``: downloading the sources
+    * ``"configure"``: ./configure --flags
+    * ``"build"``: make
+    * ``"stage"``: make install into staging directory
+    * ``"package"``: staging directory => package file
 
     Stages imply later ones, so force=stage will re-stage *and* re-package.
+    Forcing will override any sentinel checks.
     """
     package_name = "%s-%s" % (name, version)
     context = {'name': name, 'version': version, 'package_name': package_name}
     uri = uri % context
     source = posixpath.join(workdir, package_name)
     stage = posixpath.join(workdir, 'stage')
+
+    # Default to empty dict (can't use in sig, dicts are mutable)
+    sentinels = sentinels or {}
+    # Fill in empty configure value
+    if 'configure' not in sentinels:
+        sentinels['configure'] = "Makefile"
+
+    # Dependencies
+    package(*dependencies)
 
     # Handle forcing
     forcing = {}
@@ -64,44 +104,61 @@ def build(name, version, iteration, workdir, uri, force=""):
     # Directory
     # TODO: make the chmod an option if users want a "wide open" build dir for
     # manual login user poking around; default to not bothering.
-    directory(workdir, mode="777", runner=sudo)
+    directory(workdir, mode="777", runner=runner)
     # Download+unpack
     if forcing['get'] or not exists(source):
         with cd(workdir):
             # TODO: make obtainment process overrideable for users who prefer
             # wget, scp, etc
-            sudo("curl -L \"%s\" | tar xjf -" % uri)
+            flag = ""
+            if uri.endswith((".tar.gz", ".tgz")):
+                flag = "z"
+            elif uri.endswith((".tar.bz2",)):
+                flag = "j"
+            runner("curl -L \"%s\" | tar x%sf -" % (uri, flag))
 
     # Configure
-    # TODO: configuration options. Do any Python level cleaning (e.g. factoring
-    # out --with-x, --with-y into [x, y], ditto for --enable; prefix, etc.)?
-    flags = ""
+    with_flags = map(lambda x: "--with-%s" % x, with_)
+    enable_flags = map(lambda x: "--enable-%s" % x, enable)
+    all_flags = " ".join([flagstr] + with_flags + enable_flags)
     with cd(source):
-        if forcing['configure'] or not exists('Makefile'):
+        if _run_step('configure', sentinels, forcing):
+            print "++ No Makefile found, running ./configure..."
             # If forcing, clean up!
             if forcing['configure']:
-                # Is distclean just something I've used with PHP in the past,
-                # or does the average make-driven project have it?
-                sudo("make distclean")
-            sudo("./configure %s" % ' '.join(flags))
+                # TODO: make this configurable, e.g. php 'really' wants
+                # distclean for max cleaning, others may too
+                # TODO: ties in w/ same call down in build
+                runner("make clean")
+            runner("./configure %s" % all_flags)
+        else:
+            print "!! Skipping configure step: %r exists." % sentinels['configure']
 
         # Build
-        # TODO: allow specification of sentinel
-        build_sentinel = "file in source dir"
-        if forcing['build'] or not exists(build_sentinel):
-            sudo("make")
+        if _run_step('build', sentinels, forcing):
+            if forcing['build']:
+                runner("make clean")
+            print "++ No build sentinel or build sentinel not found, running make..."
+            runner("make")
+        else:
+            print "!! Skipping build step: %r exists" % sentinels['build']
 
         # Stage
-        # TODO: allow specification of sentinel
-        stage_sentinel = "file in stage dir"
-        if forcing['stage'] or not exists(stage_sentinel):
+        if sentinels.get('stage', None):
+            sentinels['stage'] = posixpath.join("..", stage, sentinels['stage'])
+        if _run_step('stage', sentinels, forcing):
+            print "++ No stage sentinel or stage sentinel not found, running make install..."
             with settings(warn_only=True):
-                # Nuke if forcing -- e.g. if prefix changed, etc.
+                # Nuke if forcing -- e.g. if --prefix changed, etc.
+                # (Otherwise a prefix change would leave both prefixes in the
+                # stage, causing problems on actual package install.)
                 if forcing['stage']:
-                    sudo("rm -rf %s" % stage)
+                    runner("rm -rf %s" % stage)
                 # TODO: allow control over environment of make, e.g. things
-                # like INSTALL_ROOT=.
-                sudo("make install")
+                # like INSTALL_ROOT= for apps that don't support DESTDIR
+                runner("DESTDIR=%s make install" % stage)
+        else:
+            print "!! Skipping stage step: %r exists" % sentinels['stage']
 
     # Package
     with cd(stage):
@@ -111,9 +168,13 @@ def build(name, version, iteration, workdir, uri, force=""):
         # Main thing that needs doing is constructing an explicit package name
         # and making FPM use it, so one can reliably use that same name format
         # in eg Chef or Puppet.
-        package_path = "???"
-        if forcing['package'] or not exists(package_path):
+        package_path = "foo"
+        if _run_step('package', sentinels, forcing):
+            print "++ No package sentinel or package sentinel not found, running fpm..."
             pass
+        else:
+            print "!! Skipping package step: %r exists" % sentinels['package']
+
 
     # TODO: a distribute step? Possibly too user-specific. Or make this a
     # class-based collection of subtasks and let them override that.
