@@ -15,6 +15,7 @@ def _run_step(name, forcing, sentinel=None):
     sentinel_present = exists(sentinel) if sentinel else False
     return forcing[name] or not sentinel_present
 
+_go_msg = "++ %s: forced or sentinel missing, running..."
 
 def clean(runner):
     runner("make clean")
@@ -153,14 +154,14 @@ def build(name, version, iteration, workdir, uri, type_, enable=(), with_=(),
         if forcing['configure'] and exists('Makefile'):
             clean(runner)
         if _run_step('configure', forcing, sentinels['configure']):
-            print "++ No Makefile found, running ./configure..."
+            print _go_msg % 'configure'
             runner("./configure %s" % all_flags)
         else:
             print "!! Skipping configure step: %r exists." % sentinels['configure']
 
         # Build
         if _run_step('build', forcing, sentinels['build']):
-            print "++ No build sentinel or build sentinel not found, running make..."
+            print _go_msg % 'build'
             runner("make")
         else:
             print "!! Skipping build step: %r exists" % sentinels['build']
@@ -170,7 +171,7 @@ def build(name, version, iteration, workdir, uri, type_, enable=(), with_=(),
         if stage_sentinel is not None:
             stage_sentinel = posixpath.join("..", stage, sentinels['stage'])
         if _run_step('stage', forcing, stage_sentinel):
-            print "++ No stage sentinel or stage sentinel not found, running make install..."
+            print _go_msg % 'stage'
             with settings(warn_only=True):
                 # Nuke if forcing -- e.g. if --prefix changed, etc.
                 # (Otherwise a prefix change would leave both prefixes in the
@@ -192,7 +193,7 @@ def build(name, version, iteration, workdir, uri, type_, enable=(), with_=(),
         # and making FPM use it, so one can reliably use that same name format
         # in eg Chef or Puppet.
         if do_package:
-            print "++ No package sentinel or package sentinel not found, running fpm..."
+            print _go_msg % 'package'
             # --package <workdir> to control where package actually goes.
             # Filename format will be the default for the given output type.
             # Target directory is '.' since we're cd'd to stage root. Will then
