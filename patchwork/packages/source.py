@@ -4,7 +4,7 @@ Functions for configuring/compiling/installing/packaging source distributions.
 
 import posixpath
 
-from fabric.api import task, run, cd, settings, abort
+from fabric.api import run, cd, settings, abort
 
 from ..files import directory, exists
 from ..environment import has_binary
@@ -17,14 +17,21 @@ def _run_step(name, sentinels, forcing):
     return forcing[name] or not sentinel_present
 
 
+def clean(runner):
+    runner("make clean")
+
+def install(runner, stage_root):
+    runner("DESTDIR=%s make install" % stage_root)
+
+
 # TODO: maybe break this up into fewer, richer args? e.g. objects or dicts.
 # Pro: smaller API
 # Con: requires boilerplate for simple stuff
 # TODO: great candidate for "collection of tasks" class based approach.
 # TODO: also re: each step now looking very similar, at LEAST loop.
-@task
 def build(name, version, iteration, workdir, uri, type_, enable=(), with_=(),
-    flagstr="", dependencies=(), sentinels=None, force="", runner=run):
+    flagstr="", dependencies=(), sentinels=None, clean=clean, install=install,
+    force="", runner=run):
     """
     Build a package from source, using fpm.
 
@@ -58,11 +65,11 @@ def build(name, version, iteration, workdir, uri, type_, enable=(), with_=(),
       ``"--no-bad-stuff --with-blah=/usr/blah"``.
     * ``dependencies``: Package names to ensure are installed prior to
       building, using ``package()``.
-    * ``sentinels``: Keys are stages, values should be paths to files whose
-      existence indicates a successful run of that stage. For each given stage,
-      if ``force`` is not set (see below) and its ``sentinel`` value is
-      non-empty and the file exists, that stage will automatically be
-      skipped.
+    * ``sentinels``: Keys are stages, values should be paths (relative to the
+      source directory unless otherwise specified) to files whose existence
+      indicates a successful run of that stage. For each given stage, if
+      ``force`` is not set (see below) and its ``sentinel`` value is non-empty
+      and the file exists, that stage will automatically be skipped.
 
       Per-stage details:
 
@@ -70,6 +77,13 @@ def build(name, version, iteration, workdir, uri, type_, enable=(), with_=(),
         other stages have no default values.
       * ``"stage"``: The path given here is considered relative to the staging
         directory, not the unpacked source directory.
+      * ``"package"``: The path given here should be relative to ``workdir``.
+
+    * ``clean``: Callback (given ``runner``) to execute when cleaning is
+      needed. Defaults to a function that calls ``runner("make clean")``.
+    * ``install``: Callback (given ``runner`` and ``stage_root``) to execute as
+      the "install" step. Defaults to a function that calls
+      ``runner("DESTDIR=<stage_root> make install")``
 
     May force a reset to one of the following stages by specifying ``force``:
 
@@ -123,9 +137,9 @@ def build(name, version, iteration, workdir, uri, type_, enable=(), with_=(),
             # TODO: make obtainment process overrideable for users who prefer
             # wget, scp, etc
             flag = ""
-            if uri.endswith((".tar.gz", ".tgz")):
+            if any([x in uri for x in (".tar.gz", ".tgz")]):
                 flag = "z"
-            elif uri.endswith((".tar.bz2",)):
+            elif any([x in uri for x in (".tar.bz2",)]):
                 flag = "j"
             runner("curl -L \"%s\" | tar x%sf -" % (uri, flag))
 
@@ -138,9 +152,7 @@ def build(name, version, iteration, workdir, uri, type_, enable=(), with_=(),
         # from bad builds can be seriously annoying, especially if they don't
         # cause outright problems.
         if forcing['configure'] and exists('Makefile'):
-            # TODO: make this configurable, e.g. php 'really' wants
-            # distclean for max cleaning, others may too
-            runner("make clean")
+            clean(runner)
         if _run_step('configure', sentinels, forcing):
             print "++ No Makefile found, running ./configure..."
             runner("./configure %s" % all_flags)
@@ -165,11 +177,12 @@ def build(name, version, iteration, workdir, uri, type_, enable=(), with_=(),
                 # stage, causing problems on actual package install.)
                 if forcing['stage']:
                     runner("rm -rf %s" % stage)
-                # TODO: allow control over environment of make, e.g. things
-                # like INSTALL_ROOT= for apps that don't support DESTDIR
-                runner("DESTDIR=%s make install" % stage)
+                install(runner=runner, stage_root=stage)
         else:
             print "!! Skipping stage step: %r exists" % sentinels['stage']
+
+    with cd(workdir):
+        do_package = _run_step('package', sentinels, forcing)
 
     with cd(stage):
         # TODO: handle clean fpm integration somehow. probably have nice Python
@@ -178,7 +191,7 @@ def build(name, version, iteration, workdir, uri, type_, enable=(), with_=(),
         # Main thing that needs doing is constructing an explicit package name
         # and making FPM use it, so one can reliably use that same name format
         # in eg Chef or Puppet.
-        if _run_step('package', sentinels, forcing):
+        if do_package:
             print "++ No package sentinel or package sentinel not found, running fpm..."
             # --package <workdir> to control where package actually goes.
             # Filename format will be the default for the given output type.
