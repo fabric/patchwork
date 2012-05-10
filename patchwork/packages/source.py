@@ -64,16 +64,16 @@ def build(name, version, iteration, workdir, uri, type_, enable=(), with_=(),
       ``"--no-bad-stuff --with-blah=/usr/blah"``.
     * ``dependencies``: Package names to ensure are installed prior to
       building, using ``package()``.
-    * ``sentinels``: Keys are stages, values should be paths (relative to the
+    * ``sentinels``: Keys are steps, values should be paths (relative to the
       source directory unless otherwise specified) to files whose existence
-      indicates a successful run of that stage. For each given stage, if
+      indicates a successful run of that step. For each given step, if
       ``force`` is not set (see below) and its ``sentinel`` value is non-empty
-      and the file exists, that stage will automatically be skipped.
+      and the file exists, that step will automatically be skipped.
 
-      Per-stage details:
+      Per-step details:
 
       * ``"configure"``: Default value for this key is ``"Makefile"``. The
-        other stages have no default values.
+        other steps have no default values.
       * ``"stage"``: The path given here is considered relative to the staging
         directory, not the unpacked source directory.
       * ``"package"``: The path given here should be relative to ``workdir``.
@@ -84,7 +84,7 @@ def build(name, version, iteration, workdir, uri, type_, enable=(), with_=(),
       the "install" step. Defaults to a function that calls
       ``runner("DESTDIR=<stage_root> make install")``
 
-    May force a reset to one of the following stages by specifying ``force``:
+    May force a reset to one of the following steps by specifying ``force``:
 
     * ``"get"``: downloading the sources
     * ``"configure"``: ./configure --flags
@@ -92,7 +92,7 @@ def build(name, version, iteration, workdir, uri, type_, enable=(), with_=(),
     * ``"stage"``: make install into staging directory
     * ``"package"``: staging directory => package file
 
-    Stages imply later ones, so force=stage will re-stage *and* re-package.
+    steps imply later ones, so force=stage will re-stage *and* re-package.
     Forcing will override any sentinel checks.
     """
     package_name = "%s-%s" % (name, version)
