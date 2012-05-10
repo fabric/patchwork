@@ -11,8 +11,7 @@ from ..environment import has_binary
 from . import package
 
 
-def _run_step(name, sentinels, forcing):
-    sentinel = sentinels.get(name, None)
+def _run_step(name, forcing, sentinel=None):
     sentinel_present = exists(sentinel) if sentinel else False
     return forcing[name] or not sentinel_present
 
@@ -153,23 +152,24 @@ def build(name, version, iteration, workdir, uri, type_, enable=(), with_=(),
         # cause outright problems.
         if forcing['configure'] and exists('Makefile'):
             clean(runner)
-        if _run_step('configure', sentinels, forcing):
+        if _run_step('configure', forcing, sentinels['configure']):
             print "++ No Makefile found, running ./configure..."
             runner("./configure %s" % all_flags)
         else:
             print "!! Skipping configure step: %r exists." % sentinels['configure']
 
         # Build
-        if _run_step('build', sentinels, forcing):
+        if _run_step('build', forcing, sentinels['build']):
             print "++ No build sentinel or build sentinel not found, running make..."
             runner("make")
         else:
             print "!! Skipping build step: %r exists" % sentinels['build']
 
         # Stage
-        if sentinels.get('stage', None):
-            sentinels['stage'] = posixpath.join("..", stage, sentinels['stage'])
-        if _run_step('stage', sentinels, forcing):
+        stage_sentinel = sentinels['stage']
+        if stage_sentinel is not None:
+            stage_sentinel = posixpath.join("..", stage, sentinels['stage'])
+        if _run_step('stage', forcing, stage_sentinel):
             print "++ No stage sentinel or stage sentinel not found, running make install..."
             with settings(warn_only=True):
                 # Nuke if forcing -- e.g. if --prefix changed, etc.
@@ -182,7 +182,7 @@ def build(name, version, iteration, workdir, uri, type_, enable=(), with_=(),
             print "!! Skipping stage step: %r exists" % sentinels['stage']
 
     with cd(workdir):
-        do_package = _run_step('package', sentinels, forcing)
+        do_package = _run_step('package', forcing, sentinels['package'])
 
     with cd(stage):
         # TODO: handle clean fpm integration somehow. probably have nice Python
