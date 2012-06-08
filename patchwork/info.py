@@ -16,7 +16,8 @@ def distro_name():
     * ``other``
     """
     sentinel_files = {
-        'fedora': ('fedora-release',)
+        'fedora': ('fedora-release',),
+        'centos': ('centos-release',),
     }
     for name, sentinels in sentinel_files.iteritems():
         for sentinel in sentinels:
