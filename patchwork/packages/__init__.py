@@ -16,8 +16,8 @@ def package(*packages):
     # Run from cache vs updating package lists every time; assume 'yes'.
     yum = "yum install -y %s"
     manager = apt if distro_family() == "debian" else yum
-    for package in packages:
-        sudo(manager % package)
+    
+    sudo(manager % " ".join(packages))
 
 
 def rubygem(gem):
