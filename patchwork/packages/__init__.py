@@ -1,3 +1,5 @@
+from functools import wraps
+
 from fabric.api import sudo
 from patchwork.info import distro_family
 
@@ -23,3 +25,21 @@ def rubygem(gem):
     Install a Rubygem
     """
     return sudo("gem install -b --no-rdoc --no-ri %s" % gem)
+
+
+class requires_packages(object):
+    """
+    A decorator that ensures the listed packages are installed. Example:
+
+    @task
+    @requires_packages('python-dev', 'redis-server', 'nginx')
+    def my_task(): ...
+    """
+    def __init__(self, *args):
+        self.packages = args
+
+    def __call__(self, fn, *args, **kwargs):
+        def wrapper():
+            package(*self.packages)
+            fn(*args, **kwargs)
+        return wraps(fn)(wrapper)
