@@ -1,7 +1,8 @@
+from fabric.api import run, settings, hide
 from fabric.contrib.files import exists
 
 
-def distro_name():
+def distro_name(runner=run):
     """
     Return simple Linux distribution name identifier, e.g. ``"fedora"``.
 
@@ -23,6 +24,12 @@ def distro_name():
         for sentinel in sentinels:
             if exists('/etc/%s' % sentinel):
                 return name
+    
+    with settings(hide('everything'), warn_only=True):
+        distro = runner('lsb_release --short --id')
+        if distro.succeeded:
+            return distro.lower()
+    
     return "other"
 
 
