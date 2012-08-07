@@ -9,9 +9,9 @@ from fabric.api import sudo, run, settings, hide
 def backup_file(file_path, use_sudo=False, verbose=False):
     """
     Create a backup of ``file_path`` by creating a copy in the original
-    directory, suffixed with a dash(-) and a date expression "%d%m%y_%H%M%S". 
+    directory, suffixed with a dash(-) and a date expression "%Y%m%d_%H%M%S". 
     For example:
-    /path/to/origfile.conf becomes /path/to/origfile.conf-310712_142231
+    /path/to/origfile.conf becomes /path/to/origfile.conf-20120801_142231
 
     If ``use_sudo`` is True, will use `sudo` instead of `run`.
 
@@ -22,7 +22,7 @@ def backup_file(file_path, use_sudo=False, verbose=False):
     """
     func = use_sudo and sudo or run
 
-    cmd = 'cp %s %s-`date +\"%%d%%m%%y_%%H%%M%%S\"`' % (file_path, file_path)
+    cmd = 'cp %s %s-`date +\"%%Y%%m%%d_%%H%%M%%S\"`' % (file_path, file_path)
 
     if verbose:
         with settings(warn_only=True):
