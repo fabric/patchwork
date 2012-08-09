@@ -91,3 +91,10 @@ def _escape_for_regex(text):
     # Whereas single quotes should not be escaped
     regex = regex.replace(r"\'", "'")
     return regex
+
+def cat(path, runner=run):
+    """
+    Cat a file, returning its contents as a string.
+    """
+    with hide('stdout'):
+        return runner('cat "%(path)s"' % locals()).stdout
