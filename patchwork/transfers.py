@@ -7,8 +7,8 @@ from fabric.network import key_filenames, normalize
 from fabric.state import output
 
 
-def rsync(source, target, exclude=(), delete=False, rsync_opts='',
-    ssh_opts=''):
+def rsync(source, target, exclude=(), delete=False, strict_host_keys=True,
+    rsync_opts='', ssh_opts=''):
     """
     Convenient wrapper around your friendly local ``rsync``.
 
@@ -51,6 +51,10 @@ def rsync(source, target, exclude=(), delete=False, rsync_opts='',
     * ``delete``: a boolean controlling whether ``rsync``'s ``--delete`` option
       is used. If True, instructs ``rsync`` to remove remote files that no
       longer exist locally. Defaults to False.
+    * ``strict_host_keys``: Boolean determining whether to enable/disable the
+      SSH-level option ``StrictHostKeyChecking`` (useful for
+      frequently-changing hosts such as virtual machines or cloud instances.)
+      Defaults to True.
     * ``rsync_opts``: an optional, arbitrary string which you may use to pass
       custom arguments or options to ``rsync``.
     * ``ssh_opts``: Like ``rsync_opts`` but specifically for the SSH options
@@ -83,8 +87,12 @@ def rsync(source, target, exclude=(), delete=False, rsync_opts='',
     # Port
     user, host, port = normalize(env.host_string)
     port_string = "-p %s" % port
-    # RSH
+    # Remote shell (SSH) options
     rsh_string = ""
+    # Strict host key checking
+    disable_keys = '-o StrictHostKeyChecking=no'
+    if not strict_host_keys and disable_keys not in ssh_opts:
+        ssh_opts += ' %s' % disable_keys
     rsh_parts = [key_string, port_string, ssh_opts]
     if any(rsh_parts):
         rsh_string = "--rsh='ssh %s'" % " ".join(rsh_parts)
