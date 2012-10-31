@@ -111,8 +111,4 @@ def rsync(source, target, exclude=(), delete=False, strict_host_keys=True,
         cmd = "rsync %s %s [%s@%s]:%s" % (options, source, user, host, target)
     else:
         cmd = "rsync %s %s %s@%s:%s" % (options, source, user, host, target)
-    # Honor running-level output
-    if output.running:
-        print("[%s] rsync: %s" % (env.host_string, cmd))
-    with hide('running'): # Don't print the inner '[localhost] rsync: xxx'
-        return local(cmd, capture=True)
+    return local(cmd, capture=True)
