@@ -4,15 +4,14 @@
 # subpackages by hand :(
 from setuptools import setup, find_packages
 
-# Import ourselves for version info
-import patchwork
-
-# Frankenstein long_description: version-specific changelog note + README
-v = patchwork.__version__
+# Version info -- read without importing
+_locals = {}
+version_module = execfile('patchwork/_version.py', _locals)
+version = _locals['__version__']
 
 setup(
     name='patchwork',
-    version=v,
+    version=version,
     description='Common deploy/sysadmin operations',
     license='BSD',
 
