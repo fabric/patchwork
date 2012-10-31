@@ -111,4 +111,4 @@ def rsync(source, target, exclude=(), delete=False, strict_host_keys=True,
         cmd = "rsync %s %s [%s@%s]:%s" % (options, source, user, host, target)
     else:
         cmd = "rsync %s %s %s@%s:%s" % (options, source, user, host, target)
-    return local(cmd, capture=True)
+    return local(cmd)
