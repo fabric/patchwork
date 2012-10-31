@@ -2,7 +2,7 @@
 File transfers, both those using Fabric's put/get, and otherwise.
 """
 
-from fabric.api import local, env
+from fabric.api import local, env, hide
 from fabric.network import key_filenames, normalize
 from fabric.state import output
 
@@ -103,6 +103,8 @@ def rsync(source, target, exclude=(), delete=False, rsync_opts='',
         cmd = "rsync %s %s [%s@%s]:%s" % (options, source, user, host, target)
     else:
         cmd = "rsync %s %s %s@%s:%s" % (options, source, user, host, target)
+    # Honor running-level output
     if output.running:
         print("[%s] rsync: %s" % (env.host_string, cmd))
-    return local(cmd)
+    with hide('running'): # Don't print the inner '[localhost] rsync: xxx'
+        return local(cmd, capture=True)
