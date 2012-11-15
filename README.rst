@@ -10,9 +10,6 @@ tools, or even to build your own Chef or Puppet level system.
 Patchwork is implemented on top of the `Fabric <http://fabfile.org>`_
 high-level SSH module.
 
-For documentation, including detailed installation information, please see
-http://patchwork.fabfile.org.
-
 You can install the `development version
 <https://github.com/fabric/patchwork/tarball/master#egg=patchwork-dev>`_ via
 ``pip install patchwork==dev`` or ``pip install -e
