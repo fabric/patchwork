@@ -15,7 +15,9 @@ def run_script(source, cwd, binary='bash', runner=run):
     Works by copying the file remotely, executing it, & removing it. Removal
     will always occur even if execution fails.
 
-    :param source: Local path to script file; passed directly to ``fabric.operations.get``.
+    :param source:
+        Local path to script file; passed directly to
+        ``fabric.operations.get``.
     :param cwd: Remote working directory to copy to & invoke script from.
     :param binary:
         Command to run remotely with the script as its argument. Defaults to
