@@ -37,6 +37,8 @@ API description
     * Including "download this URL directly to the remote end", etc
 * `auth`: Create/manage users, groups, `sudoers` etc
 * `vcs`: Manage version control checkouts
+* `commands`: Execute complicated tasks combining run/sudo/get/put and so
+  forth, such as uploading/running/removing script files.
 
 Stuff that might want to live in some sort of plugin/ext system?)
 
