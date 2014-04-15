@@ -80,6 +80,13 @@ def append(filename, text, partial=False, escape=True, runner=run):
         line = line.replace("'", r"'\\''") if escape else line
         runner("echo '%s' >> %s" % (line, filename))
 
+def symlink(src, dst, runner=run):
+    """
+    Return `True` if creating a symlink succeeded
+
+    """
+
+    return runner("ln -nfs %s %s" % (src, dst)).succeded
 
 def _escape_for_regex(text):
     """Escape ``text`` to allow literal matching using egrep"""
