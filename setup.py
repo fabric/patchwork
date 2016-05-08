@@ -22,7 +22,7 @@ Dev install: https://github.com/fabric/patchwork/tarball/master#egg=patchwork-de
     author_email='jeff@bitprophet.org',
     url='http://patchwork.fabfile.org',
 
-    install_requires=["fabric>=1.4"],
+    install_requires=["fabric>=1.4,<2.0"],
     packages=find_packages(),
 
     classifiers=[
