@@ -1,5 +1,6 @@
-Patchwork is a Python (2.6+) toolkit for common Unix deployment and sysadmin
-operations, such as "install package", "create directory with X owner", etc.
+Patchwork is a Python (2.7/3.4+) toolkit for common Unix deployment and
+sysadmin operations, such as "install package", "create directory with X
+owner", etc.
 
 For those familiar with configuration management tools like Chef or Puppet,
 this library is similar to a standalone version of their "Resources". Unlike
@@ -9,6 +10,3 @@ tools, or even to build your own Chef or Puppet level system.
 
 Patchwork is implemented on top of the `Fabric <http://fabfile.org>`_
 high-level SSH module.
-
-You can install the development version via ``pip install -e
-git+https://github.com/fabric/patchwork#egg=patchwork``.

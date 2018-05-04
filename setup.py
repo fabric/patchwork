@@ -1,47 +1,51 @@
 #!/usr/bin/env python
 
-# Would love to use distutils but fuck manually keeping a list of all my
-# subpackages by hand :(
+# Support setuptools only, distutils has a divergent and more annoying API and
+# few folks will lack setuptools.
 from setuptools import setup, find_packages
 
 # Version info -- read without importing
 _locals = {}
-version_module = execfile('patchwork/_version.py', _locals)
+with open('invoke/_version.py') as fp:
+    exec(fp.read(), None, _locals)
 version = _locals['__version__']
 
 setup(
     name='patchwork',
     version=version,
-    description='Common deploy/sysadmin operations',
+    description='Deployment/sysadmin operations, powered by Fabric',
     license='BSD',
 
-    long_description="""This is an unsupported alpha release! Use with caution.
-
-Dev install: https://github.com/fabric/patchwork/tarball/master#egg=patchwork-dev""",
+    long_description=open('README.rst').read(),
     author='Jeff Forcier',
     author_email='jeff@bitprophet.org',
-    url='http://patchwork.fabfile.org',
+    url='https://patchwork.readthedocs.io',
 
-    install_requires=["fabric>=1.4,<2.0"],
+    install_requires=["fabric>=2.0,<3.0"],
     packages=find_packages(),
 
     classifiers=[
-          'Development Status :: 3 - Alpha',
-          'Environment :: Console',
-          'Intended Audience :: Developers',
-          'Intended Audience :: System Administrators',
-          'License :: OSI Approved :: BSD License',
-          'Operating System :: MacOS :: MacOS X',
-          'Operating System :: Unix',
-          'Operating System :: POSIX',
-          'Programming Language :: Python',
-          'Programming Language :: Python :: 2.6',
-          'Programming Language :: Python :: 2.7',
-          'Topic :: Software Development',
-          'Topic :: Software Development :: Build Tools',
-          'Topic :: Software Development :: Libraries',
-          'Topic :: Software Development :: Libraries :: Python Modules',
-          'Topic :: System :: Software Distribution',
-          'Topic :: System :: Systems Administration',
+        'Development Status :: 5 - Production/Stable',
+        'Environment :: Console',
+        'Intended Audience :: Developers',
+        'Intended Audience :: System Administrators',
+        'License :: OSI Approved :: BSD License',
+        'Operating System :: POSIX',
+        'Operating System :: Unix',
+        'Operating System :: MacOS :: MacOS X',
+        'Operating System :: Microsoft :: Windows',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Topic :: Software Development',
+        'Topic :: Software Development :: Build Tools',
+        'Topic :: Software Development :: Libraries',
+        'Topic :: Software Development :: Libraries :: Python Modules',
+        'Topic :: System :: Software Distribution',
+        'Topic :: System :: Systems Administration',
     ],
 )
