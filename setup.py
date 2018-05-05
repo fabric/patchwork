@@ -6,7 +6,7 @@ from setuptools import setup, find_packages
 
 # Version info -- read without importing
 _locals = {}
-with open('invoke/_version.py') as fp:
+with open('patchwork/_version.py') as fp:
     exec(fp.read(), None, _locals)
 version = _locals['__version__']
 
