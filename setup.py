@@ -21,7 +21,9 @@ setup(
     author_email='jeff@bitprophet.org',
     url='https://patchwork.readthedocs.io',
 
-    install_requires=["fabric>=2.0,<3.0"],
+    install_requires=[
+        "fabric>=2.0,<3.0",
+    ],
     packages=find_packages(),
 
     classifiers=[
