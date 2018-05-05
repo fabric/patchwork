@@ -15,9 +15,11 @@ things like introspecting a target system's operating system.  Specifically:
       frameworks like `Chef <http://opscode.com/chef/>`_ or `Puppet
       <http://puppetlabs.com>`_. Patchwork is closest in nature to those tools'
       "resources."
-* It is implemented in **shell calls**, typically sent **over SSH** via the
-  `Fabric <http://fabfile.org>`_ library from a local workstation (though it
-  will eventually be able to execute local commands too.)
+* It is implemented in **shell calls**, typically sent **over SSH** via the `Fabric
+  <http://fabfile.org>`_ library from a local workstation -- though where
+  possible, its functions expect a baseline Invoke `~invoke.context.Context`
+  object and can thus run locally or remotely, depending on the specific
+  context supplied by the caller.
 
 
 ===============
