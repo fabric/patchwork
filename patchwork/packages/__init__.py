@@ -1,3 +1,7 @@
+"""
+Management of various (usually binary) package types - OS, language, etc.
+"""
+
 from fabric.api import sudo
 from patchwork.info import distro_family
 
@@ -20,6 +24,6 @@ def package(*packages):
 
 def rubygem(gem):
     """
-    Install a Rubygem
+    Install a Ruby gem.
     """
     return sudo("gem install -b --no-rdoc --no-ri %s" % gem)

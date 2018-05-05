@@ -1,9 +1,18 @@
+"""
+Functions for interrogating a system to determine general attributes.
+
+Specifically, anything that doesn't fit better in other modules where we also
+manipulate this information (like `auth` or `packages`). For example, detecting
+operating system family and version.
+"""
+
+
 from fabric.contrib.files import exists
 
 
 def distro_name():
     """
-    Return simple Linux distribution name identifier, e.g. ``"fedora"``.
+    Return simple Linux distribution name identifier, e.g. ``"ubuntu"``.
 
     Uses tools like ``/etc/issue``, and ``lsb_release`` and fits the remote
     system into one of the following:

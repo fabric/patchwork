@@ -1,0 +1,5 @@
+=========
+``files``
+=========
+
+.. automodule:: patchwork.files

@@ -1,0 +1,5 @@
+========
+``info``
+========
+
+.. automodule:: patchwork.info

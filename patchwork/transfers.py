@@ -1,5 +1,5 @@
 """
-File transfers, both those using Fabric's put/get, and otherwise.
+File transfer functionality above and beyond basic ``put``/``get``.
 """
 
 from fabric.api import local, env, hide

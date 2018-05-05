@@ -1,0 +1,5 @@
+========
+``auth``
+========
+
+.. automodule:: patchwork.auth

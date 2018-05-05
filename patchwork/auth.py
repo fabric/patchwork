@@ -1,3 +1,10 @@
+"""
+Manage OS-level users and their authentication configurations.
+
+For example: creation/removal/modification of users and groups, uploads of
+``authorized_keys`` files, manipulation of ``sudoers``, etc.
+"""
+
 from fabric.api import sudo, hide
 
 from patchwork.files import append

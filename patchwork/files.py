@@ -1,3 +1,7 @@
+"""
+Tools for file and directory management.
+"""
+
 import re
 
 from fabric.api import run, settings, hide, run
