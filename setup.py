@@ -22,7 +22,7 @@ setup(
     url='https://fabric-patchwork.readthedocs.io',
 
     install_requires=[
-        "fabric>=2.0,<3.0",
+    #    "fabric>=2.0,<3.0",
     ],
     packages=find_packages(),
 
