@@ -5,3 +5,4 @@ wheel==0.24
 twine==1.11.0
 invocations==0.20.0
 pytest-relaxed==1.1.2
+mock==1.0.1

@@ -4,31 +4,34 @@ Tools for file and directory management.
 
 import re
 
-from fabric.api import run, settings, hide, run
+from .util import set_runner
 
 
-def directory(d, user=None, group=None, mode=None, runner=run):
+@set_runner
+def directory(c, runner, path, user=None, group=None, mode=None):
     """
     Ensure a directory exists and has given user and/or mode
     """
-    runner("mkdir -p %s" % d)
+    runner("mkdir -p {}".format(path))
     if user is not None:
         group = group or user
-        runner("chown %s:%s %s" % (user, group, d))
+        runner("chown {}:{} {}".format(user, group, path))
     if mode is not None:
-        runner("chmod %s %s" % (mode, d))
+        runner("chmod {} {}".format(mode, path))
 
 
-def exists(path, runner=run):
+@set_runner
+def exists(c, runner, path):
     """
     Return True if given path exists on the current remote host.
     """
-    cmd = 'test -e "$(echo %s)"' % path
+    cmd = 'test -e "$(echo {})"'.format(path)
     with settings(hide('everything'), warn_only=True):
         return runner(cmd).succeeded
 
 
-def contains(filename, text, exact=False, escape=True, runner=run):
+@set_runner
+def contains(c, runner, filename, text, exact=False, escape=True):
     """
     Return True if ``filename`` contains ``text`` (which may be a regex.)
 
@@ -48,13 +51,13 @@ def contains(filename, text, exact=False, escape=True, runner=run):
     if escape:
         text = _escape_for_regex(text)
         if exact:
-            text = "^%s$" % text
-    with settings(hide('everything'), warn_only=True):
-        egrep_cmd = 'egrep "%s" "%s"' % (text, filename)
-        return runner(egrep_cmd, shell=False).succeeded
+            text = "^{}$".format(text)
+    egrep_cmd = 'egrep "{}" "{}"'.format(text, filename)
+    return runner(egrep_cmd, hide=True, warn=True).succeeded
 
 
-def append(filename, text, partial=False, escape=True, runner=run):
+@set_runner
+def append(c, runner, filename, text, partial=False, escape=True):
     """
     Append string (or list of strings) ``text`` to ``filename``.
 
@@ -78,11 +81,14 @@ def append(filename, text, partial=False, escape=True, runner=run):
         text = [text]
     for line in text:
         regex = '^' + _escape_for_regex(line)  + ('' if partial else '$')
-        if (exists(filename, runner=runner) and line
-            and contains(filename, regex, escape=False, runner=runner)):
+        if (
+            line and
+            exists(c, filename, runner=runner) and
+            contains(c, filename, regex, escape=False, runner=runner)
+        ):
             continue
         line = line.replace("'", r"'\\''") if escape else line
-        runner("echo '%s' >> %s" % (line, filename))
+        runner("echo '{}' >> {}".format(line, filename))
 
 
 def _escape_for_regex(text):
