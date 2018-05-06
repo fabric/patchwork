@@ -27,7 +27,7 @@ html_theme_options = {
     # TODO: make new UA property? only good for full domains and not RTD.io?
     # 'analytics_id': 'UA-18486793-X',
     # TODO: re-enable travis when we grow tests
-    #'travis_button': True,
+    # 'travis_button': True,
     # 'codecov_button': True, # TODO: get better coverage sometime, heh
 }
 html_sidebars = {

@@ -4,6 +4,8 @@ Tools for file and directory management.
 
 import re
 
+from invoke.vendor import six
+
 from .util import set_runner
 
 
@@ -26,8 +28,7 @@ def exists(c, runner, path):
     Return True if given path exists on the current remote host.
     """
     cmd = 'test -e "$(echo {})"'.format(path)
-    with settings(hide('everything'), warn_only=True):
-        return runner(cmd).succeeded
+    return runner(cmd, hide=True, warn=True).succeeded
 
 
 @set_runner
@@ -73,14 +74,14 @@ def append(c, runner, filename, text, partial=False, escape=True):
     "append lines to a file" use case. You may override this and force partial
     searching (e.g. ``^<text>``) by specifying ``partial=True``.
 
-    Because ``text`` is single-quoted, single quotes will be transparently 
+    Because ``text`` is single-quoted, single quotes will be transparently
     backslash-escaped. This can be disabled with ``escape=False``.
     """
     # Normalize non-list input to be a list
-    if isinstance(text, basestring):
+    if isinstance(text, six.string_types):
         text = [text]
     for line in text:
-        regex = '^' + _escape_for_regex(line)  + ('' if partial else '$')
+        regex = '^' + _escape_for_regex(line) + ('' if partial else '$')
         if (
             line and
             exists(c, filename, runner=runner) and

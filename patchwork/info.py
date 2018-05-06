@@ -42,7 +42,7 @@ def distro_family(c):
 
     * ``debian``
     * ``redhat``
-    
+
     If the system falls outside these categories, its specific family or
     release name will be returned instead.
     """

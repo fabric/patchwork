@@ -6,7 +6,7 @@ from functools import wraps
 # - Phrasing them as methods on mixin classes to pile on top of Context (so:
 # c.directory('/foo/bar/')) pushes us farther towards a god object antipattern,
 # though it seems clearly the most practical, especially if we reimplement
-# implicit global context; 
+# implicit global context;
 # - Have each patchwork module as a property of Context itself might help a
 # _little_ bit (so it becomes: c.files.directory('/foo/bar/')) but only a
 # little, and it almost too-strongly ties us to the module organization (it's
@@ -38,7 +38,7 @@ def set_runner(f):
 
     The final value of ``runner`` depends on other args given to the decorated
     function (**note:** *not* the decorator itself!) as follows:
-    
+
     - By default, you can simply ignore the decorated function's ``runner``
       argument entirely, in which case it will end up being set to the ``run``
       method on the first positional arg (expected to be a

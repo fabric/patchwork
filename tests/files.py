@@ -1,5 +1,5 @@
 from mock import Mock, call
-from invoke import Context, MockContext
+from invoke import Context
 
 from patchwork.files import directory
 

@@ -1,5 +1,4 @@
 from invoke import Context
-from pytest import raises
 
 from patchwork.util import set_runner
 
@@ -48,7 +47,9 @@ class util:
             myfunc(Context(), 'otherval', args='override', sudo=True)
 
         def may_give_runner_directly_for_no_magic(self):
-            whatever = lambda x: x
+            def whatever():
+                pass
+
             @set_runner
             def myfunc(c, runner, other, args='values', default='default'):
                 assert isinstance(c, Context)
@@ -59,14 +60,18 @@ class util:
             myfunc(Context(), 'otherval', args='override', runner=whatever)
 
         def runner_wins_over_runner_method(self):
-            whatever = lambda x: x
+            def whatever():
+                pass
+
             @set_runner
             def myfunc(c, runner):
                 assert runner is whatever
             myfunc(Context(), runner=whatever, runner_method='run')
 
         def runner_wins_over_sudo(self):
-            whatever = lambda x: x
+            def whatever():
+                pass
+
             @set_runner
             def myfunc(c, runner):
                 assert runner is whatever
