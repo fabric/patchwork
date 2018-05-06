@@ -2,7 +2,7 @@ from importlib import import_module
 
 from invocations import docs, travis
 from invocations.packaging import release
-from invocations.pytest import test
+from invocations.pytest import test, coverage
 
 from invoke import Collection, task
 
@@ -19,7 +19,7 @@ def sanity(c):
         print("Imported {} successfully".format(mod))
 
 
-ns = Collection(docs, release, travis, test, sanity)
+ns = Collection(docs, release, travis, test, coverage, sanity)
 ns.configure({
     'packaging': {
         'sign': True,
