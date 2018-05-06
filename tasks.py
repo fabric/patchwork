@@ -1,5 +1,3 @@
-from __future__ import unicode_literals, print_function
-
 from importlib import import_module
 
 from invocations import docs, travis
@@ -16,8 +14,9 @@ def sanity(c):
     """
     # Doesn't need to literally import everything, but "a handful" will do.
     for name in ('environment', 'files', 'transfers'):
-        import_module("patchwork.{}".format(name))
-    print("\U0001F44D") # FUN WITH UNICODE
+        mod = "patchwork.{}".format(name)
+        import_module(mod)
+        print("Imported {} successfully".format(mod))
 
 
 ns = Collection(docs, release, travis, test, sanity)
