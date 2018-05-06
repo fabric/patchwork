@@ -2,13 +2,16 @@
 File transfer functionality above and beyond basic ``put``/``get``.
 """
 
-from fabric.api import local, env, hide
-from fabric.network import key_filenames, normalize
-from fabric.state import output
-
-
-def rsync(source, target, exclude=(), delete=False, strict_host_keys=True,
-    rsync_opts='', ssh_opts=''):
+def rsync(
+    c,
+    source,
+    target,
+    exclude=(),
+    delete=False,
+    strict_host_keys=True,
+    rsync_opts='',
+    ssh_opts='',
+):
     """
     Convenient wrapper around your friendly local ``rsync``.
 
@@ -18,59 +21,56 @@ def rsync(source, target, exclude=(), delete=False, strict_host_keys=True,
     allows you to specify custom options via a string if required (see below.)
 
     For details on how ``rsync`` works, please see its manpage. ``rsync`` must
-    be installed on both your local and remote systems in order for this
+    be installed on both the invoking system and the target in order for this
     function to work correctly.
 
-    This function makes use of Fabric's ``local()`` function and returns its
-    output; thus it will exhibit ``failed``/``succeeded``/``stdout``/``stderr``
-    attributes, behaves like a string consisting of ``stdout``, and so forth.
+    .. note::
+        This function transparently honors the given `.Connection`'s connection
+        parameters such as port number and SSH key path.
 
-    ``rsync()`` takes the following parameters:
+    .. note::
+        For reference, the approximate ``rsync`` command-line call that is
+        constructed by this function is the following::
 
-    * ``source``: The local location to copy from. Actually a string passed
-      verbatim to ``rsync``, and thus may be a single directory
-      (``"my_directory"``) or multiple directories (``"dir1 dir2"``). See the
-      ``rsync`` documentation for details.
-    * ``target``: The path to sync with on the remote server. Due to how
-      ``rsync`` is implemented, the exact behavior depends on the value of
-      ``source``:
+            rsync [--delete] [--exclude exclude[0][, --exclude[1][, ...]]] \\
+                -pthrvz [rsync_opts] <source> <host_string>:<target>
 
-        * If ``source`` ends with a trailing slash, the files will be
-          dropped inside of ``target``. E.g.
-          ``rsync("foldername/", "/home/username/project")`` will drop
-          the contents of ``foldername`` inside of ``/home/username/project``.
-        * If ``source`` does **not** end with a trailing slash,
-          ``target`` is effectively the "parent" directory, and a new
-          directory named after ``source`` will be created inside of it. So
-          ``rsync("foldername", "/home/username")`` would create a new
-          directory ``/home/username/foldername`` (if needed) and place the
-          files there.
+    :param str source:
+        The local path to copy from. Actually a string passed verbatim to
+        ``rsync``, and thus may be a single directory (``"my_directory"``) or
+        multiple directories (``"dir1 dir2"``). See the ``rsync`` documentation
+        for details.
+    :param str target:
+        The path to sync with on the remote end. Due to how ``rsync`` is
+        implemented, the exact behavior depends on the value of ``source``:
 
-    * ``exclude``: optional, may be a single string, or an iterable of strings,
-      and is used to pass one or more ``--exclude`` options to ``rsync``.
-    * ``delete``: a boolean controlling whether ``rsync``'s ``--delete`` option
-      is used. If True, instructs ``rsync`` to remove remote files that no
-      longer exist locally. Defaults to False.
-    * ``strict_host_keys``: Boolean determining whether to enable/disable the
-      SSH-level option ``StrictHostKeyChecking`` (useful for
-      frequently-changing hosts such as virtual machines or cloud instances.)
-      Defaults to True.
-    * ``rsync_opts``: an optional, arbitrary string which you may use to pass
-      custom arguments or options to ``rsync``.
-    * ``ssh_opts``: Like ``rsync_opts`` but specifically for the SSH options
-      string (rsync's ``--rsh`` flag.)
+        - If ``source`` ends with a trailing slash, the files will be dropped
+          inside of ``target``. E.g. ``rsync(c, "foldername/",
+          "/home/username/project")`` will drop the contents of ``foldername``
+          inside of ``/home/username/project``.
+        - If ``source`` does **not** end with a trailing slash, ``target`` is
+          effectively the "parent" directory, and a new directory named after
+          ``source`` will be created inside of it. So ``rsync(c, "foldername",
+          "/home/username")`` would create a new directory
+          ``/home/username/foldername`` (if needed) and place the files there.
 
-    This function transparently honors Fabric's port and SSH key
-    settings. Calling this function when the current host string contains a
-    nonstandard port, or when ``env.key_filename`` is non-empty, will use the
-    specified port and/or SSH key filename(s).
-
-    For reference, the approximate ``rsync`` command-line call that is
-    constructed by this function is the following::
-
-        rsync [--delete] [--exclude exclude[0][, --exclude[1][, ...]]] \\
-            -pthrvz [rsync_opts] <source> <host_string>:<target>
-
+    :param exclude:
+        Optional, may be a single string or an iterable of strings, and is
+        used to pass one or more ``--exclude`` options to ``rsync``.
+    :param bool delete:
+        A boolean controlling whether ``rsync``'s ``--delete`` option is used.
+        If True, instructs ``rsync`` to remove remote files that no longer
+        exist locally. Defaults to False.
+    :param bool strict_host_keys:
+        Boolean determining whether to enable/disable the SSH-level option
+        ``StrictHostKeyChecking`` (useful for frequently-changing hosts such as
+        virtual machines or cloud instances.) Defaults to True.
+    :param str rsync_opts:
+        An optional, arbitrary string which you may use to pass custom
+        arguments or options to ``rsync``.
+    :param str ssh_opts:
+        Like ``rsync_opts`` but specifically for the SSH options string
+        (rsync's ``--rsh`` flag.)
     """
     # Turn single-string exclude into a one-item list for consistency
     if not hasattr(exclude, '__iter__'):
