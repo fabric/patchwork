@@ -41,7 +41,7 @@ html_sidebars = {
 
 # Other extension configs
 autodoc_default_flags = ['members', 'special-members']
-releases_github_path = 'pyinvoke/invocations'
+releases_github_path = 'fabric/patchwork'
 
 
 # Intersphinx
