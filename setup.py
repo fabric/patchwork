@@ -19,7 +19,7 @@ setup(
     long_description=open('README.rst').read(),
     author='Jeff Forcier',
     author_email='jeff@bitprophet.org',
-    url='https://patchwork.readthedocs.io',
+    url='https://fabric-patchwork.readthedocs.io',
 
     install_requires=[
         "fabric>=2.0,<3.0",
