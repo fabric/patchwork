@@ -6,11 +6,10 @@ manipulate this information (like `auth` or `packages`). For example, detecting
 operating system family and version.
 """
 
+from .files import exists
 
-from fabric.contrib.files import exists
 
-
-def distro_name():
+def distro_name(c):
     """
     Return simple Linux distribution name identifier, e.g. ``"ubuntu"``.
 
@@ -30,12 +29,12 @@ def distro_name():
     }
     for name, sentinels in sentinel_files.iteritems():
         for sentinel in sentinels:
-            if exists('/etc/%s' % sentinel):
+            if exists(c, '/etc/{}'.format(sentinel)):
                 return name
     return "other"
 
 
-def distro_family():
+def distro_family(c):
     """
     Returns basic "family" ID for the remote system's distribution.
 
@@ -51,7 +50,7 @@ def distro_family():
         'debian': "debian ubuntu".split(),
         'redhat': "rhel centos fedora".split()
     }
-    distro = distro_name()
+    distro = distro_name(c)
     for family, members in families.iteritems():
         if distro in members:
             return family

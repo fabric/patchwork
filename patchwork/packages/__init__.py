@@ -2,11 +2,14 @@
 Management of various (usually binary) package types - OS, language, etc.
 """
 
-from fabric.api import sudo
+# TODO: intent is to have various submodules for the various package managers -
+# apt/deb, rpm/yum/dnf, arch/pacman, etc etc etc.
+
+
 from patchwork.info import distro_family
 
 
-def package(*packages):
+def package(c, *packages):
     """
     Installs one or more ``packages`` using the system package manager.
 
@@ -14,16 +17,16 @@ def package(*packages):
     ``yum`` once per package given.
     """
     # Try to suppress interactive prompts, assume 'yes' to all questions
-    apt = "DEBIAN_FRONTEND=noninteractive apt-get install -y %s"
+    apt = "DEBIAN_FRONTEND=noninteractive apt-get install -y {}"
     # Run from cache vs updating package lists every time; assume 'yes'.
     yum = "yum install -y %s"
-    manager = apt if distro_family() == "debian" else yum
+    manager = apt if distro_family(c) == "debian" else yum
     for package in packages:
-        sudo(manager % package)
+        c.sudo(manager.format(package))
 
 
-def rubygem(gem):
+def rubygem(c, gem):
     """
     Install a Ruby gem.
     """
-    return sudo("gem install -b --no-rdoc --no-ri %s" % gem)
+    return c.sudo("gem install -b --no-rdoc --no-ri {}".format(gem))
