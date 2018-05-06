@@ -15,6 +15,8 @@ matrix:
   fast_finish: true
 install:
   - pip install -r dev-requirements.txt
+  # TODO: remove the below post-fabric-release
+  - pip install -e 'git+https://github.com/fabric/fabric@v2#egg=fabric'
 script:
   # Run tests w/ coverage first, so it uses the local-installed copy.
   # (If we do this after the below installation tests, coverage will think
