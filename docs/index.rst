@@ -18,6 +18,16 @@ as its API (and those of its sister library, `invocations
 <https://invocations.readthedocs.io>`_) matures.
 
 
+Contents
+========
+
+.. toctree::
+    :glob:
+    :maxdepth: 1
+
+    *
+
+
 API documentation
 =================
 
