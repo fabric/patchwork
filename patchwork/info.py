@@ -2,7 +2,7 @@
 Functions for interrogating a system to determine general attributes.
 
 Specifically, anything that doesn't fit better in other modules where we also
-manipulate this information (such as `packages`). For example, detecting
+manipulate this information (such as `.packages`). For example, detecting
 operating system family and version.
 """
 

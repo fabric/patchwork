@@ -10,6 +10,7 @@ templates_path = ['_templates']
 source_suffix = '.rst'
 master_doc = 'index'
 exclude_patterns = ['_build']
+default_role = 'obj'
 
 project = u'Patchwork'
 year = datetime.now().year

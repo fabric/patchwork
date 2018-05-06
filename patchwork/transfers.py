@@ -27,8 +27,9 @@ def rsync(
     function to work correctly.
 
     .. note::
-        This function transparently honors the given `.Connection`'s connection
-        parameters such as port number and SSH key path.
+        This function transparently honors the given
+        `~fabric.connection.Connection`'s connection parameters such as port
+        number and SSH key path.
 
     .. note::
         For reference, the approximate ``rsync`` command-line call that is
