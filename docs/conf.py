@@ -65,7 +65,7 @@ fab_target = join(
     '..', '..', 'fabric2', 'sites', 'docs', '_build'
 )
 if not on_dev:
-    fab_target = 'http://docs.fabfile.org/en/v2/'
+    fab_target = 'http://docs.fabfile.org/en/latest/'
 # Paramiko
 para_target = join(
     dirname(__file__),
