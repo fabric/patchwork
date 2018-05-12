@@ -28,7 +28,7 @@ def exists(c, runner, path):
     Return True if given path exists on the current remote host.
     """
     cmd = 'test -e "$(echo {})"'.format(path)
-    return runner(cmd, hide=True, warn=True).succeeded
+    return runner(cmd, hide=True, warn=True).ok
 
 
 @set_runner
@@ -54,7 +54,7 @@ def contains(c, runner, filename, text, exact=False, escape=True):
         if exact:
             text = "^{}$".format(text)
     egrep_cmd = 'egrep "{}" "{}"'.format(text, filename)
-    return runner(egrep_cmd, hide=True, warn=True).succeeded
+    return runner(egrep_cmd, hide=True, warn=True).ok
 
 
 @set_runner
