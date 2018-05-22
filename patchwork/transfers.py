@@ -113,7 +113,7 @@ def rsync(
     # Set up options part of string
     options_map = {
         'delete': '--delete' if delete else '',
-        'exclude': exclude_opts.format(exclusions),
+        'exclude': exclude_opts.format(*exclusions),
         'rsh': rsh_string,
         'extra': rsync_opts,
     }
