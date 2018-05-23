@@ -4,6 +4,7 @@ File transfer functionality above and beyond basic ``put``/``get``.
 
 from invoke.vendor import six
 
+
 def rsync(
     c,
     source,
@@ -11,8 +12,8 @@ def rsync(
     exclude=(),
     delete=False,
     strict_host_keys=True,
-    rsync_opts='',
-    ssh_opts='',
+    rsync_opts="",
+    ssh_opts="",
 ):
     """
     Convenient wrapper around your friendly local ``rsync``.
@@ -104,23 +105,23 @@ def rsync(
     # Remote shell (SSH) options
     rsh_string = ""
     # Strict host key checking
-    disable_keys = '-o StrictHostKeyChecking=no'
+    disable_keys = "-o StrictHostKeyChecking=no"
     if not strict_host_keys and disable_keys not in ssh_opts:
-        ssh_opts += ' {}'.format(disable_keys)
+        ssh_opts += " {}".format(disable_keys)
     rsh_parts = [key_string, port_string, ssh_opts]
     if any(rsh_parts):
         rsh_string = "--rsh='ssh {}'".format(" ".join(rsh_parts))
     # Set up options part of string
     options_map = {
-        'delete': '--delete' if delete else '',
-        'exclude': exclude_opts.format(exclusions),
-        'rsh': rsh_string,
-        'extra': rsync_opts,
+        "delete": "--delete" if delete else "",
+        "exclude": exclude_opts.format(exclusions),
+        "rsh": rsh_string,
+        "extra": rsync_opts,
     }
     options = "{delete}{exclude} -pthrvz {extra} {rsh}".format(**options_map)
     # Create and run final command string
     # TODO: richer host object exposing stuff like .address_is_ipv6 or whatever
-    if host.count(':') > 1:
+    if host.count(":") > 1:
         # Square brackets are mandatory for IPv6 rsync address,
         # even if port number is not specified
         cmd = "rsync {} {} [{}@{}]:{}"

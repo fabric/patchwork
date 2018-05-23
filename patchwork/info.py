@@ -24,12 +24,12 @@ def distro_name(c):
     * ``other``
     """
     sentinel_files = {
-        'fedora': ('fedora-release',),
-        'centos': ('centos-release',),
+        "fedora": ("fedora-release",),
+        "centos": ("centos-release",),
     }
     for name, sentinels in sentinel_files.iteritems():
         for sentinel in sentinels:
-            if exists(c, '/etc/{}'.format(sentinel)):
+            if exists(c, "/etc/{}".format(sentinel)):
                 return name
     return "other"
 
@@ -47,8 +47,8 @@ def distro_family(c):
     release name will be returned instead.
     """
     families = {
-        'debian': "debian ubuntu".split(),
-        'redhat': "rhel centos fedora".split()
+        "debian": "debian ubuntu".split(),
+        "redhat": "rhel centos fedora".split(),
     }
     distro = distro_name(c)
     for family, members in families.iteritems():
