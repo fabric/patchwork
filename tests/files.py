@@ -1,17 +1,11 @@
-from mock import Mock, call
-from invoke import Context
+from mock import call
 
 from patchwork.files import directory
 
+from _util import MockedContext
 
-class files:
-    def setup(self):
-        # TODO: use MockContext if we care about supplying mocked results of
-        # run()/etc calls. For now we only care about what's being put INTO
-        # run() and friends, for which MockContext isn't as useful.
-        self.c = Context()
-        self.c.run = Mock()
-        self.c.sudo = Mock()
+
+class files(MockedContext):
 
     class directory_:
 
