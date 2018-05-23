@@ -1,6 +1,7 @@
 from importlib import import_module
 
 from invocations import docs, travis
+from invocations.checks import blacken
 from invocations.packaging import release
 from invocations.pytest import test, coverage
 
@@ -19,5 +20,5 @@ def sanity(c):
         print("Imported {} successfully".format(mod))
 
 
-ns = Collection(docs, release, travis, test, coverage, sanity)
+ns = Collection(docs, release, travis, test, coverage, sanity, blacken)
 ns.configure({"packaging": {"sign": True, "wheel": True, "check_desc": True}})
