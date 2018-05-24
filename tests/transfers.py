@@ -1,8 +1,10 @@
 from patchwork.transfers import rsync
 
 
+local = "localpath"
+remote = "remotepath"
 base = "rsync  -pthrvz"
-end = "localpath user@host:remotepath"
+end = "{} user@host:{}".format(local, remote)
 
 
 class transfers:
@@ -12,7 +14,7 @@ class transfers:
         def _expect(self, cxn, expected, kwargs=None):
             if kwargs is None:
                 kwargs = {}
-            rsync(cxn, "localpath", "remotepath", **kwargs)
+            rsync(cxn, local, remote, **kwargs)
             command = cxn.local.call_args[0][0]
             assert expected == command
 
