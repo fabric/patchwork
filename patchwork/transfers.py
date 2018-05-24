@@ -92,7 +92,7 @@ def rsync(
     # and so forth, re: connect_kwargs
     # TODO: we could get VERY fancy here by eg generating a tempfile from any
     # in-memory-only keys...but that's also arguably a security risk, so...
-    keys = c.connect_kwargs.key_filename
+    keys = c.connect_kwargs.get("key_filename", [])
     # TODO: would definitely be nice for Connection/FabricConfig to expose an
     # always-a-list, always-up-to-date-from-all-sources attribute to save us
     # from having to do this sort of thing. (may want to wait for Paramiko auth
