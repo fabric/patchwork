@@ -2,6 +2,9 @@
 Changelog
 =========
 
+- :bug:`20` (via :issue:`21`) `patchwork.transfers.rsync` didn't handle its
+  ``exclude`` parameter correctly when building the final ``rsync`` command (it
+  came out looking like a stringified tuple). Fixed by Kegan Gan.
 - :bug:`-` Fix a bug in `patchwork.transfers.rsync` where it would fail with
   ``AttributeError`` unless your connection had ``connect_kwargs.key_filename``
   defined.
