@@ -53,9 +53,9 @@ inv_target = join(
 )
 if not on_dev:
     inv_target = "http://docs.pyinvoke.org/en/latest/"
-# Fabric (2)
+# Fabric
 fab_target = join(
-    dirname(__file__), "..", "..", "fabric2", "sites", "docs", "_build"
+    dirname(__file__), "..", "..", "fabric", "sites", "docs", "_build"
 )
 if not on_dev:
     fab_target = "http://docs.fabfile.org/en/latest/"
