@@ -4,6 +4,7 @@ File transfer functionality above and beyond basic ``put``/``get``.
 
 from invoke.vendor import six
 
+
 def rsync(
     c,
     source,
@@ -11,8 +12,8 @@ def rsync(
     exclude=(),
     delete=False,
     strict_host_keys=True,
-    rsync_opts='',
-    ssh_opts='',
+    rsync_opts="",
+    ssh_opts="",
 ):
     """
     Convenient wrapper around your friendly local ``rsync``.
@@ -38,6 +39,8 @@ def rsync(
             rsync [--delete] [--exclude exclude[0][, --exclude[1][, ...]]] \\
                 -pthrvz [rsync_opts] <source> <host_string>:<target>
 
+    :param c:
+        `.Connection` object upon which to operate.
     :param str source:
         The local path to copy from. Actually a string passed verbatim to
         ``rsync``, and thus may be a single directory (``"my_directory"``) or
@@ -89,7 +92,7 @@ def rsync(
     # and so forth, re: connect_kwargs
     # TODO: we could get VERY fancy here by eg generating a tempfile from any
     # in-memory-only keys...but that's also arguably a security risk, so...
-    keys = c.connect_kwargs.key_filename
+    keys = c.connect_kwargs.get("key_filename", [])
     # TODO: would definitely be nice for Connection/FabricConfig to expose an
     # always-a-list, always-up-to-date-from-all-sources attribute to save us
     # from having to do this sort of thing. (may want to wait for Paramiko auth
@@ -104,23 +107,22 @@ def rsync(
     # Remote shell (SSH) options
     rsh_string = ""
     # Strict host key checking
-    disable_keys = '-o StrictHostKeyChecking=no'
+    disable_keys = "-o StrictHostKeyChecking=no"
     if not strict_host_keys and disable_keys not in ssh_opts:
-        ssh_opts += ' {}'.format(disable_keys)
+        ssh_opts += " {}".format(disable_keys)
     rsh_parts = [key_string, port_string, ssh_opts]
     if any(rsh_parts):
         rsh_string = "--rsh='ssh {}'".format(" ".join(rsh_parts))
     # Set up options part of string
     options_map = {
-        'delete': '--delete' if delete else '',
-        'exclude': exclude_opts.format(*exclusions),
-        'rsh': rsh_string,
-        'extra': rsync_opts,
+        "exclude": exclude_opts.format(*exclusions),
+        "rsh": rsh_string,
+        "extra": rsync_opts,
     }
     options = "{delete}{exclude} -pthrvz {extra} {rsh}".format(**options_map)
     # Create and run final command string
     # TODO: richer host object exposing stuff like .address_is_ipv6 or whatever
-    if host.count(':') > 1:
+    if host.count(":") > 1:
         # Square brackets are mandatory for IPv6 rsync address,
         # even if port number is not specified
         cmd = "rsync {} {} [{}@{}]:{}"

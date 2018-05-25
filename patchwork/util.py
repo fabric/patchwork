@@ -95,20 +95,22 @@ def set_runner(f):
 
         function(c, "my-arg1", runner=some_existing_runner_object)
     """
+
     @wraps(f)
     def inner(*args, **kwargs):
         args = list(args)
         # Pop all useful kwargs (either to prevent clash with real ones, or to
         # remove ones not intended for wrapped function)
-        runner = kwargs.pop('runner', None)
-        sudo = kwargs.pop('sudo', False)
-        runner_method = kwargs.pop('runner_method', None)
+        runner = kwargs.pop("runner", None)
+        sudo = kwargs.pop("sudo", False)
+        runner_method = kwargs.pop("runner_method", None)
         # Figure out what gets applied and potentially overwrite runner
         if not runner:
             method = runner_method
             if not method:
-                method = 'sudo' if sudo else 'run'
+                method = "sudo" if sudo else "run"
             runner = getattr(args[0], method)
         args.insert(1, runner)
         return f(*args, **kwargs)
+
     return inner

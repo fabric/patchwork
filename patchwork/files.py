@@ -81,11 +81,11 @@ def append(c, runner, filename, text, partial=False, escape=True):
     if isinstance(text, six.string_types):
         text = [text]
     for line in text:
-        regex = '^' + _escape_for_regex(line) + ('' if partial else '$')
+        regex = "^" + _escape_for_regex(line) + ("" if partial else "$")
         if (
-            line and
-            exists(c, filename, runner=runner) and
-            contains(c, filename, regex, escape=False, runner=runner)
+            line
+            and exists(c, filename, runner=runner)
+            and contains(c, filename, regex, escape=False, runner=runner)
         ):
             continue
         line = line.replace("'", r"'\\''") if escape else line
@@ -96,9 +96,9 @@ def _escape_for_regex(text):
     """Escape ``text`` to allow literal matching using egrep"""
     regex = re.escape(text)
     # Seems like double escaping is needed for \
-    regex = regex.replace('\\\\', '\\\\\\')
+    regex = regex.replace("\\\\", "\\\\\\")
     # Triple-escaping seems to be required for $ signs
-    regex = regex.replace(r'\$', r'\\\$')
+    regex = regex.replace(r"\$", r"\\\$")
     # Whereas single quotes should not be escaped
     regex = regex.replace(r"\'", "'")
     return regex
