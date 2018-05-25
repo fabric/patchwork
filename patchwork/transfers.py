@@ -40,7 +40,7 @@ def rsync(
                 -pthrvz [rsync_opts] <source> <host_string>:<target>
 
     :param c:
-        `.Connection` object upon which to operate.
+        `~fabric.connection.Connection` object upon which to operate.
     :param str source:
         The local path to copy from. Actually a string passed verbatim to
         ``rsync``, and thus may be a single directory (``"my_directory"``) or
