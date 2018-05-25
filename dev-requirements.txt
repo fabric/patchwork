@@ -6,7 +6,7 @@ releases>=0.6.1,<2.0
 alabaster>=0.7.7,<2.0
 wheel==0.24
 twine==1.11.0
-invocations>=1.1.0,<2.0
+invocations>=1.2.0,<2.0
 pytest-relaxed==1.1.2
 coverage==4.4.2
 pytest-cov==2.4.0
