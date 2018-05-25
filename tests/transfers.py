@@ -3,7 +3,8 @@ from patchwork.transfers import rsync
 
 local = "localpath"
 remote = "remotepath"
-base = "rsync  -pthrvz"
+flags = "-pthrvz"
+base = "rsync  {}".format(flags)
 end = "{} user@host:{}".format(local, remote)
 
 
@@ -34,3 +35,17 @@ class transfers:
             keys = "-i secret1.key -i secret2.key"
             expected = "{}  --rsh='ssh {} -p 22 ' {}".format(base, keys, end)
             self._expect(cxn, expected)
+
+        def single_exclusion_honored(self, cxn):
+            exclusions = '--exclude "foo"'
+            expected = "rsync  {} {}  --rsh='ssh  -p 22 ' {}".format(
+                exclusions, flags, end
+            )
+            self._expect(cxn, expected, kwargs=dict(exclude="foo"))
+
+        def multiple_exclusions_honored(self, cxn):
+            exclusions = '--exclude "foo" --exclude "bar"'
+            expected = "rsync  {} {}  --rsh='ssh  -p 22 ' {}".format(
+                exclusions, flags, end
+            )
+            self._expect(cxn, expected, kwargs=dict(exclude=["foo", "bar"]))
