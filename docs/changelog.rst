@@ -2,6 +2,12 @@
 Changelog
 =========
 
+- :bug:`23` Fix some outstanding Python 2-isms (use of ``iteritems``) in
+  `info.distro_name` and `info.distro_family`, as well as modules which
+  imported those -- such as `packages`.
+
+  Includes adding some basic tests for this functionality as well. Thanks to
+  ``@ChaoticMind`` for the report.
 - :bug:`20` (via :issue:`21`) `patchwork.transfers.rsync` didn't handle its
   ``exclude`` parameter correctly when building the final ``rsync`` command (it
   came out looking like a stringified tuple). Fixed by Kegan Gan.

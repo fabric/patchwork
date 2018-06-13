@@ -27,7 +27,7 @@ def distro_name(c):
         "fedora": ("fedora-release",),
         "centos": ("centos-release",),
     }
-    for name, sentinels in sentinel_files.iteritems():
+    for name, sentinels in sentinel_files.items():
         for sentinel in sentinels:
             if exists(c, "/etc/{}".format(sentinel)):
                 return name
@@ -51,7 +51,7 @@ def distro_family(c):
         "redhat": "rhel centos fedora".split(),
     }
     distro = distro_name(c)
-    for family, members in families.iteritems():
+    for family, members in families.items():
         if distro in members:
             return family
     return distro
