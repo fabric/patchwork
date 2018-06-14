@@ -3,8 +3,8 @@ Changelog
 =========
 
 - :bug:`23` Fix some outstanding Python 2-isms (use of ``iteritems``) in
-  `info.distro_name` and `info.distro_family`, as well as modules which
-  imported those -- such as `packages`.
+  `.info.distro_name` and `.info.distro_family`, as well as modules which
+  imported those -- such as `.packages`.
 
   Includes adding some basic tests for this functionality as well. Thanks to
   ``@ChaoticMind`` for the report.
