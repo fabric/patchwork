@@ -2,6 +2,7 @@
 Changelog
 =========
 
+- :release:`1.0.1 <2018-06-20>`
 - :bug:`23` Fix some outstanding Python 2-isms (use of ``iteritems``) in
   `.info.distro_name` and `.info.distro_family`, as well as modules which
   imported those -- such as `.packages`.
