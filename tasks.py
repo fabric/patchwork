@@ -21,4 +21,13 @@ def sanity(c):
 
 
 ns = Collection(docs, release, travis, test, coverage, sanity, blacken)
-ns.configure({"packaging": {"sign": True, "wheel": True, "check_desc": True}})
+ns.configure(
+    {
+        "packaging": {
+            "sign": True,
+            "wheel": True,
+            "check_desc": True,
+            "changelog_file": "docs/changelog.rst",
+        }
+    }
+)
