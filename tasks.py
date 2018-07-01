@@ -13,7 +13,7 @@ def sanity(c):
     Quick sanity check to ensure we're installed successfully. Mostly for CI.
     """
     # Doesn't need to literally import everything, but "a handful" will do.
-    for name in ('environment', 'files', 'transfers'):
+    for name in ('environment', 'files', 'transfers', 'users'):
         mod = "patchwork.{}".format(name)
         import_module(mod)
         print("Imported {} successfully".format(mod))
