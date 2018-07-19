@@ -41,9 +41,8 @@ def contains(c, runner, filename, text, exact=False, escape=True):
     change this behavior so that only a line containing exactly ``text``
     results in a True return value.
 
-    This function leverages ``egrep`` on the remote end (so it may not follow
-    Python regular expression syntax perfectly), and skips the usual outer
-    ``env.shell`` wrapper that most commands execute with.
+    This function leverages ``egrep`` on the remote end, so it may not follow
+    Python regular expression syntax perfectly.
 
     If ``escape`` is False, no extra regular expression related escaping is
     performed (this includes overriding ``exact`` so that no ``^``/``$`` is
