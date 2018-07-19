@@ -117,20 +117,18 @@ class util:
                     """
                     pass
 
-                expected = """
-                    myfunc(c, foo, bar="biz", sudo=False, runner_method="run", runner=None)
-                
-                    whatever
-                    
-                    seriously, whatever
-                    
-                    :param bool sudo:
-                        Whether to run shell commands via ``sudo``.
-                    :param str runner_method:
-                        Name of context method to use when running shell commands.
-                    :param runner:
-                        Callable runner function or method. Should ideally be a bound method on the given context object!
-                    """  # noqa
+                expected = """myfunc(c, foo, bar='biz', sudo=False, runner_method='run', runner=None)
+whatever
+
+seriously, whatever
+
+:param bool sudo:
+    Whether to run shell commands via ``sudo``.
+:param str runner_method:
+    Name of context method to use when running shell commands.
+:param runner:
+    Callable runner function or method. Should ideally be a bound method on the given context object!
+"""  # noqa
                 assert myfunc.__doc__ == expected
 
             def none(self):
@@ -142,6 +140,7 @@ class util:
                 assert re.match(
                     r"myfunc\(.*, sudo=False.*\)\n.*:param str runner_method:.*\n",  # noqa
                     myfunc.__doc__,
+                    re.DOTALL,
                 )
 
             def empty(self):
@@ -154,6 +153,7 @@ class util:
                 assert re.match(
                     r"myfunc\(.*, sudo=False.*\)\n.*:param str runner_method:.*\n",  # noqa
                     myfunc.__doc__,
+                    re.DOTALL,
                 )
 
             def single_line_no_newlines(self):
@@ -166,6 +166,7 @@ class util:
                 assert re.match(
                     r"myfunc\(.*, sudo=False.*\)\nwhatever\n\n.*:param str runner_method:.*\n",  # noqa
                     myfunc.__doc__,
+                    re.DOTALL,
                 )
 
             def single_line_with_newlines(self):
@@ -178,6 +179,7 @@ class util:
                     pass
 
                 assert re.match(
-                    r"myfunc\(.*, sudo=False.*\)\n +whatever\n\n.*:param str runner_method:.*\n",  # noqa
+                    r"myfunc\(.*, sudo=False.*\)\nwhatever\n\n.*:param str runner_method:.*\n",  # noqa
                     myfunc.__doc__,
+                    re.DOTALL,
                 )

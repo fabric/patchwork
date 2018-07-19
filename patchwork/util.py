@@ -2,7 +2,10 @@
 Helpers and decorators, primarily for internal or advanced use.
 """
 
+import textwrap
+
 from functools import wraps
+from inspect import getargspec, formatargspec
 
 
 # TODO: calling all functions as eg directory(c, '/foo/bar/') (with initial c)
@@ -29,13 +32,6 @@ from functools import wraps
 # or 3.0 release to see it move elsewhere once patterns are established.
 
 
-# TODO: is it possible to both expose the wrapped function's signature to
-# Sphinx autodoc AND remain a signature-altering decorator? =/ Using @decorator
-# is nice but it is only for signature-PRESERVING decorators. We really want a)
-# prevent users from having to phrase runner as 'runner=None', and b) the
-# convenience of sudo=True...but that means signature-altering.
-# TODO: this may be another spot where we want to reinstate fabric 1's docs
-# unwrap function.
 def set_runner(f):
     """
     Set 2nd posarg of decorated function to some callable ``runner``.
@@ -122,4 +118,33 @@ def set_runner(f):
         args.insert(1, runner)
         return f(*args, **kwargs)
 
+    inner.__doc__ = munge_docstring(f, inner)
     return inner
+
+
+def munge_docstring(f, inner):
+    # Terrible, awful hacks to ensure Sphinx autodoc sees the intended
+    # (modified) signature; leverages the fact that autodoc_docstring_signature
+    # is True by default.
+    args, varargs, keywords, defaults = getargspec(f)
+    # Nix positional version of runner arg, which is always 2nd
+    del args[1]
+    # Add new args to end in desired order
+    args.extend(["sudo", "runner_method", "runner"])
+    # Add default values (remembering that this tuple matches the _end_ of the
+    # signature...)
+    defaults = tuple(list(defaults or []) + [False, "run", None])
+    # Get signature first line for Sphinx autodoc_docstring_signature
+    sigtext = "{}{}".format(
+        f.__name__, formatargspec(args, varargs, keywords, defaults)
+    )
+    docstring = textwrap.dedent(inner.__doc__ or "").strip()
+    # Construct :param: list
+    params = """:param bool sudo:
+    Whether to run shell commands via ``sudo``.
+:param str runner_method:
+    Name of context method to use when running shell commands.
+:param runner:
+    Callable runner function or method. Should ideally be a bound method on the given context object!
+"""  # noqa
+    return "{}\n{}\n\n{}".format(sigtext, docstring, params)
