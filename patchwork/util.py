@@ -94,6 +94,15 @@ def set_runner(f):
         If more than one of the ``runner_method``, ``sudo`` or ``runner``
         kwargs are given simultaneously, only one will win, in the following
         order: ``runner``, then ``runner_method``, then ``sudo``.
+
+    .. note::
+        As part of the signature modification, `set_runner` also modifies the
+        resulting value's docstring as follows:
+
+        - Prepends a Sphinx autodoc compatible signature string, which is
+          stripped out automatically on doc builds; see the Sphinx
+          ``autodoc_docstring_signature`` setting.
+        - Adds trailing ``:param:`` annotations for the extra args as well.
     """
 
     @wraps(f)
