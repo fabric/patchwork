@@ -1,3 +1,5 @@
+import re
+
 from invoke import Context
 
 from patchwork.util import set_runner
@@ -99,3 +101,85 @@ class util:
                 assert runner == c.run
 
             myfunc(Context(), runner_method="run", sudo=True)
+
+        class modified_signature_prepended_to_docstring:
+
+            # NOTE: This is the main canary test with full, exact expectations.
+            # The rest use shortcuts for developer sanity.
+            def multi_line(self):
+
+                @set_runner
+                def myfunc(c, runner, foo, bar="biz"):
+                    """
+                    whatever
+
+                    seriously, whatever
+                    """
+                    pass
+
+                expected = """myfunc(c, foo, bar='biz', sudo=False, runner_method='run', runner=None)
+whatever
+
+seriously, whatever
+
+:param bool sudo:
+    Whether to run shell commands via ``sudo``.
+:param str runner_method:
+    Name of context method to use when running shell commands.
+:param runner:
+    Callable runner function or method. Should ideally be a bound method on the given context object!
+"""  # noqa
+                assert myfunc.__doc__ == expected
+
+            def none(self):
+
+                @set_runner
+                def myfunc(c, runner, foo, bar="biz"):
+                    pass
+
+                assert re.match(
+                    r"myfunc\(.*, sudo=False.*\)\n.*:param str runner_method:.*\n",  # noqa
+                    myfunc.__doc__,
+                    re.DOTALL,
+                )
+
+            def empty(self):
+
+                @set_runner
+                def myfunc(c, runner, foo, bar="biz"):
+                    ""
+                    pass
+
+                assert re.match(
+                    r"myfunc\(.*, sudo=False.*\)\n.*:param str runner_method:.*\n",  # noqa
+                    myfunc.__doc__,
+                    re.DOTALL,
+                )
+
+            def single_line_no_newlines(self):
+
+                @set_runner
+                def myfunc(c, runner, foo, bar="biz"):
+                    "whatever"
+                    pass
+
+                assert re.match(
+                    r"myfunc\(.*, sudo=False.*\)\nwhatever\n\n.*:param str runner_method:.*\n",  # noqa
+                    myfunc.__doc__,
+                    re.DOTALL,
+                )
+
+            def single_line_with_newlines(self):
+
+                @set_runner
+                def myfunc(c, runner, foo, bar="biz"):
+                    """
+                    whatever
+                    """
+                    pass
+
+                assert re.match(
+                    r"myfunc\(.*, sudo=False.*\)\nwhatever\n\n.*:param str runner_method:.*\n",  # noqa
+                    myfunc.__doc__,
+                    re.DOTALL,
+                )

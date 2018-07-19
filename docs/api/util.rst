@@ -1,0 +1,5 @@
+========
+``util``
+========
+
+.. automodule:: patchwork.util

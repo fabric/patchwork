@@ -1,4 +1,11 @@
+"""
+Helpers and decorators, primarily for internal or advanced use.
+"""
+
+import textwrap
+
 from functools import wraps
+from inspect import getargspec, formatargspec
 
 
 # TODO: calling all functions as eg directory(c, '/foo/bar/') (with initial c)
@@ -25,13 +32,6 @@ from functools import wraps
 # or 3.0 release to see it move elsewhere once patterns are established.
 
 
-# TODO: is it possible to both expose the wrapped function's signature to
-# Sphinx autodoc AND remain a signature-altering decorator? =/ Using @decorator
-# is nice but it is only for signature-PRESERVING decorators. We really want a)
-# prevent users from having to phrase runner as 'runner=None', and b) the
-# convenience of sudo=True...but that means signature-altering.
-# TODO: this may be another spot where we want to reinstate fabric 1's docs
-# unwrap function.
 def set_runner(f):
     """
     Set 2nd posarg of decorated function to some callable ``runner``.
@@ -39,42 +39,35 @@ def set_runner(f):
     The final value of ``runner`` depends on other args given to the decorated
     function (**note:** *not* the decorator itself!) as follows:
 
-    - By default, you can simply ignore the decorated function's ``runner``
-      argument entirely, in which case it will end up being set to the ``run``
-      method on the first positional arg (expected to be a
-      `~invoke.context.Context` and thus, the default value is `Context.run
-      <invoke.context.Context.run>`).
-    - You can override which method on that object is selected, by handing an
+    - By default, ``runner`` is set to the ``run`` method of the first
+      positional arg, which is expected to be a `~invoke.context.Context` (or
+      subclass). Thus the default runner is `Context.run
+      <invoke.context.Context.run>` (or, if the function was given a Fabric
+      `~fabric.connection.Connection`, `Connection.run
+      <fabric.connection.Connection.run>`).
+    - You can override which method on the context is selected, by handing an
       attribute name string to ``runner_method``.
-    - Since the common case for this functionality is to trigger use of
-      `~invoke.context.Context.sudo`, there is a convenient shorthand, setting
+    - Since the common case for overriding the runner is to trigger use of
+      `~invoke.context.Context.sudo`, there is a convenient shorthand: giving
       ``sudo=True``.
     - Finally, you may give a callable object to ``runner`` directly, in which
       case nothing special really happens (it's largely as if you called the
-      function undecorated). This is useful for cases where you're calling one
+      function undecorated, albeit with a kwarg instead of a positional
+      argument). This is mostly useful for cases where you're calling one
       decorated function from within another.
 
-    .. note::
-        The ``runner_method`` and ``sudo`` kwargs exist only at the decorator
-        level, and are not passed into the decorated function.
-
-    .. note::
-        If more than one of the above kwargs is given at the same time, only
-        one will win, in the following order: ``runner``, then
-        ``runner_method``, then ``sudo``.
-
-    As an example, given this example ``function``::
+    Given this ``function``::
 
         @set_runner
         def function(c, runner, arg1, arg2=None):
             runner("some command based on arg1 and arg2")
 
-    One may call it without any runner-related arguments, in which case
+    one may call it without any runner-related arguments, in which case
     ``runner`` ends up being a reference to ``c.run``::
 
         function(c, "my-arg1", arg2="my-arg2")
 
-    Or one may specify ``sudo`` to trigger use of ``c.sudo``::
+    or one may specify ``sudo`` to trigger use of ``c.sudo``::
 
         function(c, "my-arg1", arg2="my-arg2", sudo=True)
 
@@ -83,17 +76,29 @@ def set_runner(f):
 
         class AdminContext(Context):
             def run_admin(self, *args, **kwargs):
-                kwargs['user'] = 'admin'
+                kwargs["user"] = "admin"
                 return self.sudo(*args, **kwargs)
 
-        function(AdminContext(), "my-arg1", runner_method='run_admin')
+        function(AdminContext(), "my-arg1", runner_method="run_admin")
 
-    Finally, to reiterate, you can always give ``runner`` directly to avoid any
-    special processing (though be careful not to get mixed up - if this runner
-    isn't actually a method on the ``c`` context object, debugging could be
-    frustrating!)::
+    As noted above, you can always give ``runner`` (as a kwarg) directly to
+    avoid most special processing::
 
         function(c, "my-arg1", runner=some_existing_runner_object)
+
+    .. note::
+        If more than one of the ``runner_method``, ``sudo`` or ``runner``
+        kwargs are given simultaneously, only one will win, in the following
+        order: ``runner``, then ``runner_method``, then ``sudo``.
+
+    .. note::
+        As part of the signature modification, `set_runner` also modifies the
+        resulting value's docstring as follows:
+
+        - Prepends a Sphinx autodoc compatible signature string, which is
+          stripped out automatically on doc builds; see the Sphinx
+          ``autodoc_docstring_signature`` setting.
+        - Adds trailing ``:param:`` annotations for the extra args as well.
     """
 
     @wraps(f)
@@ -113,4 +118,33 @@ def set_runner(f):
         args.insert(1, runner)
         return f(*args, **kwargs)
 
+    inner.__doc__ = munge_docstring(f, inner)
     return inner
+
+
+def munge_docstring(f, inner):
+    # Terrible, awful hacks to ensure Sphinx autodoc sees the intended
+    # (modified) signature; leverages the fact that autodoc_docstring_signature
+    # is True by default.
+    args, varargs, keywords, defaults = getargspec(f)
+    # Nix positional version of runner arg, which is always 2nd
+    del args[1]
+    # Add new args to end in desired order
+    args.extend(["sudo", "runner_method", "runner"])
+    # Add default values (remembering that this tuple matches the _end_ of the
+    # signature...)
+    defaults = tuple(list(defaults or []) + [False, "run", None])
+    # Get signature first line for Sphinx autodoc_docstring_signature
+    sigtext = "{}{}".format(
+        f.__name__, formatargspec(args, varargs, keywords, defaults)
+    )
+    docstring = textwrap.dedent(inner.__doc__ or "").strip()
+    # Construct :param: list
+    params = """:param bool sudo:
+    Whether to run shell commands via ``sudo``.
+:param str runner_method:
+    Name of context method to use when running shell commands.
+:param runner:
+    Callable runner function or method. Should ideally be a bound method on the given context object!
+"""  # noqa
+    return "{}\n{}\n\n{}".format(sigtext, docstring, params)

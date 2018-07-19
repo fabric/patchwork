@@ -13,6 +13,17 @@ from .util import set_runner
 def directory(c, runner, path, user=None, group=None, mode=None):
     """
     Ensure a directory exists and has given user and/or mode
+
+    :param c:
+        `~invoke.context.Context` within to execute commands.
+    :param str path:
+        File path to directory.
+    :param str user:
+        Username which should own the directory.
+    :param str group:
+        Group which should own the directory; defaults to ``user``.
+    :param str mode:
+        ``chmod`` compatible mode string to apply to the directory.
     """
     runner("mkdir -p {}".format(path))
     if user is not None:
@@ -26,6 +37,11 @@ def directory(c, runner, path, user=None, group=None, mode=None):
 def exists(c, runner, path):
     """
     Return True if given path exists on the current remote host.
+
+    :param c:
+        `~invoke.context.Context` within to execute commands.
+    :param str path:
+        Path to check for existence.
     """
     cmd = 'test -e "$(echo {})"'.format(path)
     return runner(cmd, hide=True, warn=True).ok
@@ -41,13 +57,23 @@ def contains(c, runner, filename, text, exact=False, escape=True):
     change this behavior so that only a line containing exactly ``text``
     results in a True return value.
 
-    This function leverages ``egrep`` on the remote end (so it may not follow
-    Python regular expression syntax perfectly), and skips the usual outer
-    ``env.shell`` wrapper that most commands execute with.
+    This function leverages ``egrep`` on the remote end, so it may not follow
+    Python regular expression syntax perfectly.
 
     If ``escape`` is False, no extra regular expression related escaping is
     performed (this includes overriding ``exact`` so that no ``^``/``$`` is
     added.)
+
+    :param c:
+        `~invoke.context.Context` within to execute commands.
+    :param str filename:
+        File path within which to check for ``text``.
+    :param str text:
+        Text to search for.
+    :param bool exact:
+        Whether to expect an exact match.
+    :param bool escape:
+        Whether to perform regex-oriented escaping on ``text``.
     """
     if escape:
         text = _escape_for_regex(text)
@@ -76,6 +102,18 @@ def append(c, runner, filename, text, partial=False, escape=True):
 
     Because ``text`` is single-quoted, single quotes will be transparently
     backslash-escaped. This can be disabled with ``escape=False``.
+
+    :param c:
+        `~invoke.context.Context` within to execute commands.
+    :param str filename:
+        File path to append onto.
+    :param str text:
+        Text to append.
+    :param bool partial:
+        Whether to test partial line matches when determining if appending is
+        necessary.
+    :param bool escape:
+        Whether to perform regex-oriented escaping on ``text``.
     """
     # Normalize non-list input to be a list
     if isinstance(text, six.string_types):
