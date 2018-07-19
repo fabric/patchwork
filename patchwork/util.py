@@ -1,3 +1,7 @@
+"""
+Helpers and decorators, primarily for internal or advanced use.
+"""
+
 from functools import wraps
 
 
@@ -39,42 +43,35 @@ def set_runner(f):
     The final value of ``runner`` depends on other args given to the decorated
     function (**note:** *not* the decorator itself!) as follows:
 
-    - By default, you can simply ignore the decorated function's ``runner``
-      argument entirely, in which case it will end up being set to the ``run``
-      method on the first positional arg (expected to be a
-      `~invoke.context.Context` and thus, the default value is `Context.run
-      <invoke.context.Context.run>`).
-    - You can override which method on that object is selected, by handing an
+    - By default, ``runner`` is set to the ``run`` method of the first
+      positional arg, which is expected to be a `~invoke.context.Context` (or
+      subclass). Thus the default runner is `Context.run
+      <invoke.context.Context.run>` (or, if the function was given a Fabric
+      `~fabric.connection.Connection`, `Connection.run
+      <fabric.connection.Connection.run>`).
+    - You can override which method on the context is selected, by handing an
       attribute name string to ``runner_method``.
-    - Since the common case for this functionality is to trigger use of
-      `~invoke.context.Context.sudo`, there is a convenient shorthand, setting
+    - Since the common case for overriding the runner is to trigger use of
+      `~invoke.context.Context.sudo`, there is a convenient shorthand: giving
       ``sudo=True``.
     - Finally, you may give a callable object to ``runner`` directly, in which
       case nothing special really happens (it's largely as if you called the
-      function undecorated). This is useful for cases where you're calling one
+      function undecorated, albeit with a kwarg instead of a positional
+      argument). This is mostly useful for cases where you're calling one
       decorated function from within another.
 
-    .. note::
-        The ``runner_method`` and ``sudo`` kwargs exist only at the decorator
-        level, and are not passed into the decorated function.
-
-    .. note::
-        If more than one of the above kwargs is given at the same time, only
-        one will win, in the following order: ``runner``, then
-        ``runner_method``, then ``sudo``.
-
-    As an example, given this example ``function``::
+    Given this ``function``::
 
         @set_runner
         def function(c, runner, arg1, arg2=None):
             runner("some command based on arg1 and arg2")
 
-    One may call it without any runner-related arguments, in which case
+    one may call it without any runner-related arguments, in which case
     ``runner`` ends up being a reference to ``c.run``::
 
         function(c, "my-arg1", arg2="my-arg2")
 
-    Or one may specify ``sudo`` to trigger use of ``c.sudo``::
+    or one may specify ``sudo`` to trigger use of ``c.sudo``::
 
         function(c, "my-arg1", arg2="my-arg2", sudo=True)
 
@@ -83,17 +80,20 @@ def set_runner(f):
 
         class AdminContext(Context):
             def run_admin(self, *args, **kwargs):
-                kwargs['user'] = 'admin'
+                kwargs["user"] = "admin"
                 return self.sudo(*args, **kwargs)
 
-        function(AdminContext(), "my-arg1", runner_method='run_admin')
+        function(AdminContext(), "my-arg1", runner_method="run_admin")
 
-    Finally, to reiterate, you can always give ``runner`` directly to avoid any
-    special processing (though be careful not to get mixed up - if this runner
-    isn't actually a method on the ``c`` context object, debugging could be
-    frustrating!)::
+    As noted above, you can always give ``runner`` (as a kwarg) directly to
+    avoid most special processing::
 
         function(c, "my-arg1", runner=some_existing_runner_object)
+
+    .. note::
+        If more than one of the ``runner_method``, ``sudo`` or ``runner``
+        kwargs are given simultaneously, only one will win, in the following
+        order: ``runner``, then ``runner_method``, then ``sudo``.
     """
 
     @wraps(f)
