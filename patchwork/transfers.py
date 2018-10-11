@@ -9,7 +9,7 @@ def rsync(
     c,
     source,
     target,
-    from_local=False,
+    from_local=True,
     exclude=(),
     delete=False,
     strict_host_keys=True,
@@ -60,9 +60,9 @@ def rsync(
           ``source`` will be created inside of it. So ``rsync(c, "foldername",
           "/home/username")`` would create a new directory
           ``/home/username/foldername`` (if needed) and place the files there.
-    :param from_local:
-        Optional, indicates if the copy should be done from remote to local,
-        the default is from local to remote.
+    :param bool from_local:
+        Optional, indicates if the copy should be done from local to remote or
+        the other way around. The default is from local to remote.
     :param exclude:
         Optional, may be a single string or an iterable of strings, and is
         used to pass one or more ``--exclude`` options to ``rsync``.
@@ -134,9 +134,9 @@ def rsync(
         cmd_remote = '{}@{}'
 
     if from_local:
-        cmd = "rsync {} " + cmd_remote + ":{} {}"
-        cmd = cmd.format(options, user, host, source, target)
-    else:
         cmd = "rsync {} {} " + cmd_remote + ":{}"
         cmd = cmd.format(options, source, user, host, target)
+    else:
+        cmd = "rsync {} " + cmd_remote + ":{} {}"
+        cmd = cmd.format(options, user, host, source, target)
     return c.local(cmd)
