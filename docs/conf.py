@@ -30,6 +30,7 @@ html_theme_options = {
     # TODO: re-enable travis when we grow tests
     # 'travis_button': True,
     # 'codecov_button': True, # TODO: get better coverage sometime, heh
+    "tidelift_url": "https://tidelift.com/subscription/pkg/pypi-patchwork?utm_source=pypi-patchwork&utm_medium=referral&utm_campaign=docs",
 }
 html_sidebars = {
     "**": ["about.html", "navigation.html", "searchbox.html", "donate.html"]
