@@ -84,7 +84,7 @@ def contains(c, runner, filename, text, exact=False, escape=True):
 
 
 @set_runner
-def append(c, runner, filename, text, partial=False, escape=True):
+def append(c, runner, filename, text, partial=False, escape=True, overwrite=False):
     """
     Append string (or list of strings) ``text`` to ``filename``.
 
@@ -114,6 +114,8 @@ def append(c, runner, filename, text, partial=False, escape=True):
         necessary.
     :param bool escape:
         Whether to perform regex-oriented escaping on ``text``.
+    :param bool overwrite:
+        Whether to overwrite the file or not.
     """
     # Normalize non-list input to be a list
     if isinstance(text, six.string_types):
@@ -127,7 +129,11 @@ def append(c, runner, filename, text, partial=False, escape=True):
         ):
             continue
         line = line.replace("'", r"'\\''") if escape else line
-        runner("echo '{}' >> {}".format(line, filename))
+        if overwrite:
+            io_redirect = ">"
+        else:
+            io_redirect = ">>"
+        runner("echo '{}' {} {}".format(line, io_redirect, filename))
 
 
 def _escape_for_regex(text):
