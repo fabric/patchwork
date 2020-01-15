@@ -79,8 +79,8 @@ def rsync(
         Like ``rsync_opts`` but specifically for the SSH options string
         (rsync's ``--rsh`` flag.)
     :param bool remote_to_local:
-        boolean flag that indicate whether you want to sync from remote to local.
-        By default it is sync from local to remote.
+        boolean flag that indicate whether you want to sync from
+        remote to local. By default it is sync from local to remote.
     """
     # Turn single-string exclude into a one-item list for consistency
     if isinstance(exclude, six.string_types):
