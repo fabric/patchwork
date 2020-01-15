@@ -14,6 +14,7 @@ def rsync(
     strict_host_keys=True,
     rsync_opts="",
     ssh_opts="",
+    remote_to_local=False,
 ):
     """
     Convenient wrapper around your friendly local ``rsync``.
@@ -77,6 +78,9 @@ def rsync(
     :param str ssh_opts:
         Like ``rsync_opts`` but specifically for the SSH options string
         (rsync's ``--rsh`` flag.)
+    :param bool remote_to_local:
+        boolean flag that indicate whether you want to sync from remote to local.
+        By default it is sync from local to remote.
     """
     # Turn single-string exclude into a one-item list for consistency
     if isinstance(exclude, six.string_types):
@@ -126,8 +130,14 @@ def rsync(
     if host.count(":") > 1:
         # Square brackets are mandatory for IPv6 rsync address,
         # even if port number is not specified
-        cmd = "rsync {} {} [{}@{}]:{}"
+        if remote_to_local:
+            cmd = "rsync {options} [{user}@{host}]:{target} {source}"
+        else:
+            cmd = "rsync {options} {source} [{user}@{host}]:{target}"
     else:
-        cmd = "rsync {} {} {}@{}:{}"
-    cmd = cmd.format(options, source, user, host, target)
+        if remote_to_local:
+            cmd = "rsync {options} {user}@{host}:{target} {source}"
+        else:
+            cmd = "rsync {options} {source} {user}@{host}:{target}"
+    cmd = cmd.format(options=options, source=source, user=user, host=host, target=target)
     return c.local(cmd)
