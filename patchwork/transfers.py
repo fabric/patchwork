@@ -139,5 +139,11 @@ def rsync(
             cmd = "rsync {options} {user}@{host}:{target} {source}"
         else:
             cmd = "rsync {options} {source} {user}@{host}:{target}"
-    cmd = cmd.format(options=options, source=source, user=user, host=host, target=target)
+    cmd = cmd.format(
+        options=options,
+        source=source,
+        user=user,
+        host=host,
+        target=target,
+    )
     return c.local(cmd)
