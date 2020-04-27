@@ -1,6 +1,6 @@
 from mock import call
 
-from patchwork.files import directory
+from patchwork.files import *
 
 
 class files:
@@ -32,3 +32,16 @@ class files:
                 call("chown user:admins /some/dir"),
                 call("chmod 0700 /some/dir"),
             ]
+
+        def setfile_base_case_creates_file(self, cxn):
+            setfile(cxn, "test.txt")
+            cxn.run.assert_called_once_with("touch test.txt")
+
+        def setfile_sets_owner_and_group(self, cxn):
+            setfile(cxn, "test.txt", user="user", group="admins")
+            cxn.run.assert_any_call("chown user:admins test.txt")
+        
+        def setfile_sets_mode(self, cxn):
+            setfile(cxn, "test.txt", mode="0700")
+            cxn.run.assert_any_call("chmod 0700 test.txt")
+
