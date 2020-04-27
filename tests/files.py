@@ -40,8 +40,7 @@ class files:
         def setfile_sets_owner_and_group(self, cxn):
             setfile(cxn, "test.txt", user="user", group="admins")
             cxn.run.assert_any_call("chown user:admins test.txt")
-        
+
         def setfile_sets_mode(self, cxn):
             setfile(cxn, "test.txt", mode="0700")
             cxn.run.assert_any_call("chmod 0700 test.txt")
-
