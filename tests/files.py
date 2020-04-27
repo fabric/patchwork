@@ -1,6 +1,6 @@
 from mock import call
 
-from patchwork.files import *
+from patchwork.files import directory, setfile
 
 
 class files:
