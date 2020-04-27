@@ -130,6 +130,31 @@ def append(c, runner, filename, text, partial=False, escape=True):
         runner("echo '{}' >> {}".format(line, filename))
 
 
+@set_runner
+def setfile(c, runner, path, user=None, group=None, mode=None):
+    """
+    Ensure a file exists and has given user and/or mode
+
+    :param c:
+        `~invoke.context.Context` within to execute commands.
+    :param str path:
+        Path to file.
+    :param str user:
+        Username which should own the directory.
+    :param str group:
+        Group which should own the directory; defaults to ``user``.
+    :param str mode:
+        ``chmod`` compatible mode string to apply to the directory.
+    """
+    runner("touch {}".format(path))
+    if user is not None:
+        group = group or user
+        cmd = "chown {}:{} {}".format(user, group, path)
+        runner(cmd)
+    if mode is not None:
+        runner("chmod {} {}".format(mode, path))
+
+
 def _escape_for_regex(text):
     """Escape ``text`` to allow literal matching using egrep"""
     regex = re.escape(text)

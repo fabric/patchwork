@@ -1,3 +1,5 @@
 docs/_build
 .cache
 .coverage
+patchwork/__pycache__
+tests/__pycache__
