@@ -14,6 +14,7 @@ def rsync(
     strict_host_keys=True,
     rsync_opts="",
     ssh_opts="",
+    **c_local_kwargs,
 ):
     """
     Convenient wrapper around your friendly local ``rsync``.
@@ -77,6 +78,8 @@ def rsync(
     :param str ssh_opts:
         Like ``rsync_opts`` but specifically for the SSH options string
         (rsync's ``--rsh`` flag.)
+    :param **c_local_kwargs:
+        Keyword arguments passed to `~fabric.connection.Connection.Local` when executing ``rsync``
     """
     # Turn single-string exclude into a one-item list for consistency
     if isinstance(exclude, six.string_types):
@@ -130,4 +133,4 @@ def rsync(
     else:
         cmd = "rsync {} {} {}@{}:{}"
     cmd = cmd.format(options, source, user, host, target)
-    return c.local(cmd)
+    return c.local(cmd, **c_local_kwargs)
