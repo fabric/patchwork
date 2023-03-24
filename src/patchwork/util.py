@@ -1,11 +1,10 @@
 """
 Helpers and decorators, primarily for internal or advanced use.
 """
-import inspect
 import textwrap
 
 from functools import wraps
-from inspect import getfullargspec, signature
+from inspect import signature, Parameter
 
 
 # TODO: calling all functions as eg directory(c, '/foo/bar/') (with initial c)
@@ -127,13 +126,14 @@ def munge_docstring(f, inner):
     # (modified) signature; leverages the fact that autodoc_docstring_signature
     # is True by default.
     sig = signature(f)
-    args = [p.name for p in sig.parameters.values() if p.POSITIONAL_ONLY]
-    defaults = [p.default for p in sig.parameters.values() if p.default is not p.empty]
+    parameters = list(sig.parameters.values())
     # Nix positional version of runner arg, which is always 2nd
-    args.extend(["sudo", "runner_method", "runner"])
-    # Add default values (remembering that this tuple matches the _end_ of the
-    # signature...)
-    defaults = tuple(list(defaults or []) + [False, "run", None])
+    del parameters[1]
+    # Append new arguments
+    parameters.append(Parameter("sudo", Parameter.POSITIONAL_OR_KEYWORD, default=False))
+    parameters.append(Parameter("runner_method", Parameter.POSITIONAL_OR_KEYWORD, default="run"))
+    parameters.append(Parameter("runner", Parameter.POSITIONAL_OR_KEYWORD, default=None))
+    sig = sig.replace(parameters=parameters)
     # Get signature first line for Sphinx autodoc_docstring_signature
     docstring = textwrap.dedent(inner.__doc__ or "").strip()
     # Construct :param: list
@@ -144,4 +144,4 @@ def munge_docstring(f, inner):
 :param runner:
     Callable runner function or method. Should ideally be a bound method on the given context object!
 """  # noqa
-    return f"{sig}\n{docstring}\n\n{params}"
+    return f"{f.__name__}{sig}\n{docstring}\n\n{params}"
