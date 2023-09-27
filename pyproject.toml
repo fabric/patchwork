@@ -1,0 +1,63 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "patchwork"
+version = "2.0.0"
+description = "Deployment/sysadmin operations, powered by Fabric"
+authors = [{ name = "Jeff Forcier", email = "jeff@bitprophet.org" }]
+maintainers = [{ name = "Jeff Forcier", email = "jeff@bitprophet.org" }]
+requires-python = ">=3.7"
+readme = "README.rst"
+license = { file = "LICENSE" }
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: POSIX",
+    "Operating System :: Unix",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.7",
+    "Topic :: Software Development",
+    "Topic :: Software Development :: Build Tools",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: System :: Software Distribution",
+    "Topic :: System :: Systems Administration",
+]
+
+dependencies = [
+    "fabric>=2.2",
+]
+
+[project.optional-dependencies]
+docs = [
+    "releases",
+    "alabaster",
+    "sphinx",
+]
+test = [
+    "invocations",
+    "pytest",
+    "mock",
+    "pytest-relaxed",
+]
+test-cov = [
+    "pytest-cov",
+]
+dev = [
+    "patchwork[test]",
+    "pre-commit",
+]
+
+[project.urls]
+homepage = "https://www.fabfile.org/"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "*"

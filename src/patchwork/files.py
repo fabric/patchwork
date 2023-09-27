@@ -4,8 +4,6 @@ Tools for file and directory management.
 
 import re
 
-from invoke.vendor import six
-
 from .util import set_runner
 
 
@@ -25,12 +23,12 @@ def directory(c, runner, path, user=None, group=None, mode=None):
     :param str mode:
         ``chmod`` compatible mode string to apply to the directory.
     """
-    runner("mkdir -p {}".format(path))
+    runner(f"mkdir -p {path}")
     if user is not None:
         group = group or user
-        runner("chown {}:{} {}".format(user, group, path))
+        runner(f"chown {user}:{group} {path}")
     if mode is not None:
-        runner("chmod {} {}".format(mode, path))
+        runner(f"chmod {mode} {path}")
 
 
 @set_runner
@@ -78,8 +76,8 @@ def contains(c, runner, filename, text, exact=False, escape=True):
     if escape:
         text = _escape_for_regex(text)
         if exact:
-            text = "^{}$".format(text)
-    egrep_cmd = 'egrep "{}" "{}"'.format(text, filename)
+            text = f"^{text}$"
+    egrep_cmd = f'egrep "{text}" "{filename}"'
     return runner(egrep_cmd, hide=True, warn=True).ok
 
 
@@ -116,7 +114,7 @@ def append(c, runner, filename, text, partial=False, escape=True):
         Whether to perform regex-oriented escaping on ``text``.
     """
     # Normalize non-list input to be a list
-    if isinstance(text, six.string_types):
+    if isinstance(text, str):
         text = [text]
     for line in text:
         regex = "^" + _escape_for_regex(line) + ("" if partial else "$")
@@ -127,7 +125,7 @@ def append(c, runner, filename, text, partial=False, escape=True):
         ):
             continue
         line = line.replace("'", r"'\\''") if escape else line
-        runner("echo '{}' >> {}".format(line, filename))
+        runner(f"echo '{line}' >> {filename}")
 
 
 def _escape_for_regex(text):

@@ -2,8 +2,6 @@
 File transfer functionality above and beyond basic ``put``/``get``.
 """
 
-from invoke.vendor import six
-
 
 def rsync(
     c,
@@ -79,7 +77,7 @@ def rsync(
         (rsync's ``--rsh`` flag.)
     """
     # Turn single-string exclude into a one-item list for consistency
-    if isinstance(exclude, six.string_types):
+    if isinstance(exclude, str):
         exclude = [exclude]
     # Create --exclude options from exclude list
     exclude_opts = ' --exclude "{}"' * len(exclude)
@@ -97,22 +95,22 @@ def rsync(
     # always-a-list, always-up-to-date-from-all-sources attribute to save us
     # from having to do this sort of thing. (may want to wait for Paramiko auth
     # overhaul tho!)
-    if isinstance(keys, six.string_types):
+    if isinstance(keys, str):
         keys = [keys]
     if keys:
         key_string = "-i " + " -i ".join(keys)
     # Get base cxn params
     user, host, port = c.user, c.host, c.port
-    port_string = "-p {}".format(port)
+    port_string = f"-p {port}"
     # Remote shell (SSH) options
     rsh_string = ""
     # Strict host key checking
     disable_keys = "-o StrictHostKeyChecking=no"
     if not strict_host_keys and disable_keys not in ssh_opts:
-        ssh_opts += " {}".format(disable_keys)
+        ssh_opts += f" {disable_keys}"
     rsh_parts = [key_string, port_string, ssh_opts]
     if any(rsh_parts):
-        rsh_string = "--rsh='ssh {}'".format(" ".join(rsh_parts))
+        rsh_string = f"--rsh='ssh {' '.join(rsh_parts)}'"
     # Set up options part of string
     options_map = {
         "delete": "--delete" if delete else "",
@@ -120,7 +118,7 @@ def rsync(
         "rsh": rsh_string,
         "extra": rsync_opts,
     }
-    options = "{delete}{exclude} -pthrvz {extra} {rsh}".format(**options_map)
+    options = f"{options_map['delete']}{options_map['exclude']} -pthrvz {options_map['extra']} {options_map['rsh']}"
     # Create and run final command string
     # TODO: richer host object exposing stuff like .address_is_ipv6 or whatever
     if host.count(":") > 1:

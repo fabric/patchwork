@@ -1,6 +1,6 @@
 from importlib import import_module
 
-from invocations import docs, travis
+from invocations import docs
 from invocations.checks import blacken
 from invocations.packaging import release
 from invocations.pytest import test, coverage
@@ -15,12 +15,12 @@ def sanity(c):
     """
     # Doesn't need to literally import everything, but "a handful" will do.
     for name in ("environment", "files", "transfers"):
-        mod = "patchwork.{}".format(name)
+        mod = f"patchwork.{name}"
         import_module(mod)
-        print("Imported {} successfully".format(mod))
+        print(f"Imported {mod} successfully")
 
 
-ns = Collection(docs, release, travis, test, coverage, sanity, blacken)
+ns = Collection(docs, release, test, coverage, sanity, blacken)
 ns.configure(
     {
         "packaging": {
