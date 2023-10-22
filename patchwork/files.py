@@ -2,8 +2,6 @@
 Tools for file and directory management.
 """
 
-import re
-
 from invoke.vendor import six
 
 from .util import set_runner
@@ -25,12 +23,16 @@ def directory(c, runner, path, user=None, group=None, mode=None):
     :param str mode:
         ``chmod`` compatible mode string to apply to the directory.
     """
-    runner("mkdir -p {}".format(path))
+    path = path.replace(r'"', r'\"')
+    runner('mkdir -p "{}"'.format(path))
     if user is not None:
         group = group or user
-        runner("chown {}:{} {}".format(user, group, path))
+        user = user.replace(r'"', r'\"')
+        group = group.replace(r'"', r'\"')
+        runner('chown "{}:{}" "{}"'.format(user, group, path))
     if mode is not None:
-        runner("chmod {} {}".format(mode, path))
+        mode = mode.replace(r'"', r'\"')
+        runner('chmod "{}" "{}"'.format(mode, path))
 
 
 @set_runner
@@ -43,7 +45,7 @@ def exists(c, runner, path):
     :param str path:
         Path to check for existence.
     """
-    cmd = 'test -e "$(echo {})"'.format(path)
+    cmd = 'test -e "$(echo {})"'.format(path.replace(r'"', r'\"'))
     return runner(cmd, hide=True, warn=True).ok
 
 
@@ -126,17 +128,34 @@ def append(c, runner, filename, text, partial=False, escape=True):
             and contains(c, filename, regex, escape=False, runner=runner)
         ):
             continue
-        line = line.replace("'", r"'\\''") if escape else line
-        runner("echo '{}' >> {}".format(line, filename))
+        line = line.replace("'", r"'\''") if escape else line
+        filename = filename.replace(r'"', r'\"')
+        runner("echo '{}' >> \"{}\"".format(line, filename))
 
 
 def _escape_for_regex(text):
     """Escape ``text`` to allow literal matching using egrep"""
-    regex = re.escape(text)
-    # Seems like double escaping is needed for \
-    regex = regex.replace("\\\\", "\\\\\\")
-    # Triple-escaping seems to be required for $ signs
-    regex = regex.replace(r"\$", r"\\\$")
-    # Whereas single quotes should not be escaped
-    regex = regex.replace(r"\'", "'")
-    return regex
+    re_specials = '\\^$|(){}[]*+?.'
+    sh_specials = '\\$`"'
+    re_chars = []
+    sh_chars = []
+
+    # Removes newline characters.
+    # egrep does not support multi-line patterns, so they should not be used
+    # with these functions. But, this might as well remain consistent with
+    # its original behavior regarding newlines, which was to escape them,
+    # causing the shell to ignore/omit them.
+
+    for c in text:
+        if c == '\n':
+            continue
+        if c in re_specials:
+            re_chars.append('\\')
+        re_chars.append(c)
+
+    for c in re_chars:
+        if c in sh_specials:
+            sh_chars.append('\\')
+        sh_chars.append(c)
+
+    return ''.join(sh_chars)
