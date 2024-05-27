@@ -6,7 +6,7 @@ Management of various (usually binary) package types - OS, language, etc.
 # apt/deb, rpm/yum/dnf, arch/pacman, etc etc etc.
 
 
-from patchwork.info import distro_family
+from ..info import distro_family
 
 
 def package(c, *packages):
@@ -29,4 +29,4 @@ def rubygem(c, gem):
     """
     Install a Ruby gem.
     """
-    return c.sudo("gem install -b --no-rdoc --no-ri {}".format(gem))
+    return c.sudo(f"gem install -b --no-rdoc --no-ri {gem}")
