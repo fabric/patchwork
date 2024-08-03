@@ -2,8 +2,6 @@
 File transfer functionality above and beyond basic ``put``/``get``.
 """
 
-from invoke.vendor import six
-
 
 def rsync(
     c,
@@ -79,7 +77,7 @@ def rsync(
         (rsync's ``--rsh`` flag.)
     """
     # Turn single-string exclude into a one-item list for consistency
-    if isinstance(exclude, six.string_types):
+    if isinstance(exclude, str):
         exclude = [exclude]
     # Create --exclude options from exclude list
     exclude_opts = ' --exclude "{}"' * len(exclude)
@@ -97,7 +95,7 @@ def rsync(
     # always-a-list, always-up-to-date-from-all-sources attribute to save us
     # from having to do this sort of thing. (may want to wait for Paramiko auth
     # overhaul tho!)
-    if isinstance(keys, six.string_types):
+    if isinstance(keys, str):
         keys = [keys]
     if keys:
         key_string = "-i " + " -i ".join(keys)

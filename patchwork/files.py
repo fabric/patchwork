@@ -4,8 +4,6 @@ Tools for file and directory management.
 
 import re
 
-from invoke.vendor import six
-
 from .util import set_runner
 
 
@@ -116,7 +114,7 @@ def append(c, runner, filename, text, partial=False, escape=True):
         Whether to perform regex-oriented escaping on ``text``.
     """
     # Normalize non-list input to be a list
-    if isinstance(text, six.string_types):
+    if isinstance(text, str):
         text = [text]
     for line in text:
         regex = "^" + _escape_for_regex(line) + ("" if partial else "$")
