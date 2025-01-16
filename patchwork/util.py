@@ -5,7 +5,8 @@ Helpers and decorators, primarily for internal or advanced use.
 import textwrap
 
 from functools import wraps
-from inspect import getargspec, formatargspec
+#from inspect import getargspec, formatargspec
+from inspect import signature, Parameter
 
 
 # TODO: calling all functions as eg directory(c, '/foo/bar/') (with initial c)
@@ -126,7 +127,13 @@ def munge_docstring(f, inner):
     # Terrible, awful hacks to ensure Sphinx autodoc sees the intended
     # (modified) signature; leverages the fact that autodoc_docstring_signature
     # is True by default.
-    args, varargs, keywords, defaults = getargspec(f)
+    sig = signature(f)
+    args = [param.name for param in sig.parameters.values() if param.kind in (Parameter.POSITIONAL_OR_KEYWORD, Parameter.POSITIONAL_ONLY)]
+    varargs = next((param.name for param in sig.parameters.values() if param.kind == Parameter.VAR_POSITIONAL), None)
+    keywords = next((param.name for param in sig.parameters.values() if param.kind == Parameter.VAR_KEYWORD), None)
+    defaults = [param.default for param in sig.parameters.values() if param.default is not Parameter.empty]
+
+    #args, varargs, keywords, defaults = getargspec(f)
     # Nix positional version of runner arg, which is always 2nd
     del args[1]
     # Add new args to end in desired order
@@ -135,9 +142,11 @@ def munge_docstring(f, inner):
     # signature...)
     defaults = tuple(list(defaults or []) + [False, "run", None])
     # Get signature first line for Sphinx autodoc_docstring_signature
-    sigtext = "{}{}".format(
-        f.__name__, formatargspec(args, varargs, keywords, defaults)
-    )
+    # sigtext = "{}{}".format(
+    #     f.__name__, formatargspec(args, varargs, keywords, defaults)
+    # )
+    sigtext = "{}{}".format(f.__name__, signature(f))
+
     docstring = textwrap.dedent(inner.__doc__ or "").strip()
     # Construct :param: list
     params = """:param bool sudo:

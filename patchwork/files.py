@@ -4,7 +4,7 @@ Tools for file and directory management.
 
 import re
 
-from invoke.vendor import six
+import six
 
 from .util import set_runner
 
