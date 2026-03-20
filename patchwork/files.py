@@ -127,7 +127,7 @@ def append(c, runner, filename, text, partial=False, escape=True):
         ):
             continue
         line = line.replace("'", r"'\\''") if escape else line
-        runner("echo '{}' >> {}".format(line, filename))
+        runner('''bash -c "echo '{}' >> {}" '''.format(line, filename))
 
 
 def _escape_for_regex(text):
